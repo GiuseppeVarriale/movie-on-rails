@@ -32,6 +32,8 @@ class Import::KindDetector
     raise UnknownFormatError, I18n.t("imports.errors.empty_file", path:) if first_line.blank?
 
     CSV.parse_line(first_line).map { |header| header.to_s.squish.downcase }
+  rescue CSV::MalformedCSVError
+    raise UnknownFormatError, I18n.t("imports.errors.not_csv", path:)
   end
 
   def unknown_headers_message(headers)
