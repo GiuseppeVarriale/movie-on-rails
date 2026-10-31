@@ -260,14 +260,14 @@ Every query the app runs on a hot path is listed below, with the SQL Rails gener
 |---|---|---|---|
 | Best rated first (default) | `ORDER BY average_stars DESC NULLS LAST, id DESC LIMIT 12` | `index_movies_on_average_stars` on `(average_stars DESC NULLS LAST, id DESC)` | `Index Scan`, no sort |
 | By title | `ORDER BY title LIMIT 12` | `index_movies_on_title` (unique) | `Index Scan`, no sort |
-| Newest | `ORDER BY year DESC, title LIMIT 12` | none yet | `Seq Scan` + `Sort` (see below) |
+| Newest | `ORDER BY year DESC, title LIMIT 12` | `index_movies_on_newest` on `(year DESC, title)` | `Index Scan`, no sort |
 | Movies of an actor | `WHERE id IN (SELECT movie_id FROM movie_actors WHERE actor_id = 2)` | `index_movie_actors_on_actor_id` | `Bitmap Index Scan`, combined with the rating index for the order |
 | Movies of actors matching a text | `WHERE id IN (SELECT movie_id FROM movie_actors WHERE actor_id IN (SELECT id FROM actors WHERE name::text ILIKE '%leo%'))` | `index_actors_on_name_trigram` + `index_movie_actors_on_actor_id` | Trigram lookup on the actors, then the join table |
 | Cast and locations of the 12 movies (preload) | `SELECT * FROM movie_actors WHERE movie_id IN (...)` | `index_movie_actors_on_movie_id_and_actor_id` (leftmost column) | `Bitmap Index Scan` |
 
 - **The rating sort is what the brief asked to make efficient.** The average is a stored generated column, so the index on it is ordered by rating, with unrated movies last. `id` breaks ties so pages are stable. Showing the best-rated page reads 12 index entries, however many movies or reviews there are.
 - **The actor filter is a subquery, not a JOIN.** A JOIN would return a movie once per matching actor, and removing those duplicates (`DISTINCT`) would get in the way of the rating index. With `IN (subquery)`, each movie appears once and the order still comes from the index.
-- **Newest has no index yet.** On a small catalogue the sort in memory is instantaneous; a `(year DESC, title)` index would serve it the same way as the other two sorts.
+- **Every sort reads from an index.** A spec runs `EXPLAIN` on each one and fails if a `Sort` step appears. The newest sort was the last one to get its index, after this check found it sorting in memory.
 
 ### Reading: actor suggestions
 
@@ -329,7 +329,7 @@ These numbers come from a later optimization: each batch now updates all its mov
 | "xyz" (0) | 60 ms | **0.02 ms** |
 
 **Index usage is confirmed with `EXPLAIN`** for:
-- the rating sort (an index scan, no sort step);
+- every movie sort: rating, title and newest (an index scan, no sort step);
 - the actor filter subquery;
 - the actor search;
 - a movie's reviews, newest first, from a `(movie_id, created_at DESC, id DESC)` index, so a page of reviews never sorts in memory.
