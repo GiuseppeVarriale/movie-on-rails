@@ -71,6 +71,21 @@ RSpec.describe "Movies", type: :request do
       expect(response.body.scan(/<article id="movie_/).size).to eq(1)
     end
 
+    it "keeps only the permitted parameters in the pagination links" do
+      stub_const("MoviesController::PER_PAGE", 1)
+      create_list(:movie, 2)
+
+      get movies_path(sort: "title", junk: "1")
+
+      expect(response.body).to include("/movies?sort=title&amp;page=2").and not_include("junk")
+    end
+
+    it "drops a list where a single value is expected" do
+      get root_path(sort: [ "title" ], actor: [ "leo" ])
+
+      expect([ response.status, response.body ]).to match([ 200, include("No movies yet") ])
+    end
+
     it "runs the same number of queries whatever the number of movies" do
       create_movie_with_cast
       few = count_queries { get root_path }
