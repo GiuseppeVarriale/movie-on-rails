@@ -70,6 +70,22 @@ RSpec.describe Actor, type: :model do
   end
 
   describe "validations" do
+    describe "in the import context" do
+      before { create(:actor, name: "Leonardo Di Caprio") }
+
+      it "skips the name uniqueness check (the database enforces it on insert)" do
+        actor.name = "leonardo di caprio"
+
+        expect(actor.valid?(:import)).to be(true)
+      end
+
+      it "still requires a name" do
+        actor.name = ""
+
+        expect(actor.valid?(:import)).to be(false)
+      end
+    end
+
     it { is_expected.to validate_presence_of(:name) }
     # citext makes the uniqueness check case-insensitive; covered explicitly below
     it { is_expected.to validate_uniqueness_of(:name).ignoring_case_sensitivity }
