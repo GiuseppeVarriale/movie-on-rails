@@ -4,7 +4,7 @@ class Api::V1::MoviesController < Api::V1::BaseController
   def index
     @search = MovieSearch.new(sort: search_params[:sort], actor_id: search_params[:actor_id], actor: search_params[:actor])
     validate_search!
-    @pagy, @movies = paginate(@search.results, search_params.slice(:page, :per_page))
+    @pagy, @movies = paginate(@search.results, search_params)
   end
 
   def show

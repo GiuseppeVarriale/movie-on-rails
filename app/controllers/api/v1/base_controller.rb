@@ -1,6 +1,6 @@
 class Api::V1::BaseController < ActionController::API
   include AbstractController::Translation
-  include Pagy::Method
+  include Paginated
 
   DEFAULT_PER_PAGE = 20
   MAX_PER_PAGE = 100
@@ -12,9 +12,9 @@ class Api::V1::BaseController < ActionController::API
 
   private
 
-  def paginate(collection, pagination_params)
-    pagy(:offset, collection, limit: DEFAULT_PER_PAGE, client_limit: MAX_PER_PAGE, limit_key: "per_page",
-         request: { base_url: request.base_url, path: request.path, params: pagination_params.to_h })
+  def paginate(collection, permitted_params)
+    super(collection, permitted_params.slice(:page, :per_page),
+          limit: DEFAULT_PER_PAGE, client_limit: MAX_PER_PAGE, limit_key: "per_page")
   end
 
   def invalid_parameter!(name, reason, **)
