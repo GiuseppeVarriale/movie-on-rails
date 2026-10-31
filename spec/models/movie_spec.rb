@@ -63,6 +63,46 @@ RSpec.describe Movie, type: :model do
     end
   end
 
+  describe "ratings" do
+    let(:movie) { create(:movie) }
+
+    it { is_expected.to have_db_column(:ratings_sum).of_type(:integer).with_options(null: false, default: 0) }
+    it { is_expected.to have_db_column(:ratings_count).of_type(:integer).with_options(null: false, default: 0) }
+    it { is_expected.to have_db_column(:average_stars).of_type(:decimal).with_options(precision: 3, scale: 2) }
+    it { is_expected.to have_db_index([ :average_stars, :id ]) }
+
+    it "has no average without reviews" do
+      expect(movie.average_stars).to be_nil
+    end
+
+    it "computes the average in the database from the counters" do
+      described_class.update_counters(movie.id, ratings_sum: 18, ratings_count: 5)
+
+      expect(movie.reload.average_stars).to eq(BigDecimal("3.6"))
+    end
+
+    it "rounds the average to two decimals" do
+      described_class.update_counters(movie.id, ratings_sum: 11, ratings_count: 3)
+
+      expect(movie.reload.average_stars).to eq(BigDecimal("3.67"))
+    end
+
+    it "rejects negative counters" do
+      described_class.update_counters(movie.id, ratings_sum: 2, ratings_count: 1)
+
+      expect { described_class.update_counters(movie.id, ratings_count: -2) }
+        .to raise_error(ActiveRecord::StatementInvalid, /movies_ratings_non_negative/)
+    end
+
+    it "sorts by average with the index, best rated first" do
+      worse, better, unrated = create_list(:movie, 3)
+      described_class.update_counters(worse.id, ratings_sum: 11, ratings_count: 4)
+      described_class.update_counters(better.id, ratings_sum: 18, ratings_count: 5)
+
+      expect(described_class.order(Arel.sql("average_stars DESC NULLS LAST"), id: :desc)).to eq([ better, worse, unrated ])
+    end
+  end
+
   describe "database" do
     it { is_expected.to have_db_column(:title).of_type(:string).with_options(null: false) }
     it { is_expected.to have_db_column(:description).of_type(:text).with_options(null: false) }
