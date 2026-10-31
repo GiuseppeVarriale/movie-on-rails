@@ -119,3 +119,10 @@ jobs:
       - name: Run specs
         run: bin/rspec
 
+      - name: Fail on outdated API docs
+        run: |
+          bin/rails rswag:specs:swaggerize
+          if ! git diff --exit-code swagger/; then
+            echo "::error::Run bin/rails rswag:specs:swaggerize and commit swagger/"
+            exit 1
+          fi
