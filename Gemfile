@@ -56,6 +56,8 @@ group :development, :test do
   # Test framework; in development too so generators create specs and factories
   gem "rspec-rails", "~> 8.0"
   gem "factory_bot_rails", "~> 6.5"
+  # Realistic fake data for factories
+  gem "faker", "~> 3.8"
 end
 
 group :development do
