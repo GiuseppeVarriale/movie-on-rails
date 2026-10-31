@@ -83,6 +83,52 @@ RSpec.describe "Movies", type: :request do
     end
   end
 
+  describe "GET / with an actor filter" do
+    let!(:leo) { create(:actor, name: "Leonardo Di Caprio") }
+    let!(:inception) { create(:movie, title: "Inception") }
+
+    before do
+      inception.actors << leo
+      create(:movie, title: "Zodiac")
+    end
+
+    it "lists only the actor's movies" do
+      get root_path(actor_id: leo.id)
+
+      expect(response.body).to include("Inception").and not_include("Zodiac")
+    end
+
+    it "summarizes the filter" do
+      get root_path(actor_id: leo.id)
+
+      expect(response.body).to include("1 movie with Leonardo Di Caprio")
+    end
+
+    it "fills the field with the actor's name" do
+      get root_path(actor_id: leo.id)
+
+      expect(response.body).to match(/<input value="Leonardo Di Caprio"[^>]*name="actor"/)
+    end
+
+    it "filters by part of a name" do
+      get root_path(actor: "caprio")
+
+      expect(response.body).to include(%(1 movie with an actor matching &quot;caprio&quot;))
+    end
+
+    it "keeps the filter in the sort links" do
+      get root_path(actor_id: leo.id)
+
+      expect(response.body).to include(%(href="/movies?actor_id=#{leo.id}&amp;sort=title"))
+    end
+
+    it "shows an empty state when the actor has no movies" do
+      get root_path(actor: "nobody")
+
+      expect(response.body).to include("No movies with this actor").and include("Show all movies")
+    end
+  end
+
   describe "GET /movies" do
     it "renders the same page" do
       get movies_path
