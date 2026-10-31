@@ -21,5 +21,12 @@ class Import::ReviewsImporter < Import::CsvImporter
 
   def save(reviews)
     Review.insert_all(reviews.map { |review| review.slice(:movie_id, :reviewer_name, :stars, :body) })
+    add_to_movie_ratings(reviews)
+  end
+
+  def add_to_movie_ratings(reviews)
+    reviews.group_by(&:movie_id).sort.each do |movie_id, movie_reviews|
+      Movie.update_counters(movie_id, ratings_sum: movie_reviews.sum(&:stars), ratings_count: movie_reviews.size)
+    end
   end
 end
