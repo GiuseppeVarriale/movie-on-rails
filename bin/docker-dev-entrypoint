@@ -1,0 +1,17 @@
+#!/bin/bash -e
+# Entrypoint of the development containers (compose.yaml).
+
+# config/database.yml is git-ignored; start from the versioned template
+[ -f config/database.yml ] || cp config/database.example.yml config/database.yml
+
+# Install gems added to the Gemfile since the image was built
+bundle check > /dev/null || bundle install
+
+# The web container prepares the database and builds the CSS before starting the server
+if [ "$1" == "bin/rails" ] && [ "$2" == "server" ]; then
+  rm -f tmp/pids/server.pid
+  bin/rails db:prepare
+  bin/rails tailwindcss:build
+fi
+
+exec "$@"

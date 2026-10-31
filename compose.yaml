@@ -1,0 +1,82 @@
+# Development stack: docker compose up → http://localhost:3000
+#
+# Values come from .env when it exists (cp .env.example .env), with the
+# defaults below otherwise. Inside the containers the app reaches Postgres
+# and Redis by their service names (db, redis) on their usual ports. On your
+# machine they're published on 5433 and 6380, so they don't clash with a
+# Postgres or Redis you may already run on 5432 and 6379.
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+    args:
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
+  image: movie-on-rails-dev
+  volumes:
+    - .:/rails
+    - bundle:/usr/local/bundle
+  environment:
+    DATABASE_HOST: db
+    DATABASE_PORT: 5432
+    DATABASE_USERNAME: ${DATABASE_USERNAME:-postgres}
+    DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    REDIS_URL: redis://redis:6379/0
+    SIDEKIQ_USERNAME: ${SIDEKIQ_USERNAME:-}
+    SIDEKIQ_PASSWORD: ${SIDEKIQ_PASSWORD:-}
+    SIDEKIQ_CONCURRENCY: ${SIDEKIQ_CONCURRENCY:-5}
+    RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    ports:
+      - "${DOCKER_DATABASE_PORT:-5433}:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 2s
+      retries: 30
+
+  redis:
+    image: redis:7
+    ports:
+      - "${DOCKER_REDIS_PORT:-6380}:6379"
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 30
+
+  web:
+    <<: *app
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3000/up"]
+      interval: 5s
+      retries: 60
+      start_period: 10s
+
+  worker:
+    <<: *app
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  postgres:
+  redis:
+  bundle:
