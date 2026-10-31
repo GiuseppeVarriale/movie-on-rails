@@ -7,6 +7,27 @@ RSpec.describe Movie, type: :model do
     it { is_expected.to be_valid }
   end
 
+  describe "associations" do
+    it { is_expected.to have_many(:movie_actors).dependent(:destroy) }
+    it { is_expected.to have_many(:actors).through(:movie_actors) }
+
+    it "lists its cast" do
+      movie = create(:movie)
+      cage, ribisi = create_list(:actor, 2)
+      movie.actors << [ cage, ribisi ]
+
+      expect(movie.reload.actors).to contain_exactly(cage, ribisi)
+    end
+
+    it "removes its cast links but keeps the actors when destroyed" do
+      movie_actor = create(:movie_actor)
+
+      expect { movie_actor.movie.destroy }
+        .to change(MovieActor, :count).by(-1)
+        .and not_change(Actor, :count)
+    end
+  end
+
   describe "database" do
     it { is_expected.to have_db_column(:title).of_type(:string).with_options(null: false) }
     it { is_expected.to have_db_column(:description).of_type(:text).with_options(null: false) }
