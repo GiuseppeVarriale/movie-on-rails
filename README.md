@@ -53,6 +53,8 @@ Even though it's a small project, it was a lot of fun to build. Every decision b
 | Sort by average stars, efficiently | Default sort, read straight from an index on a stored generated column (`average_stars`) |
 | API endpoint | Read-only JSON API v1 with the same sorting and filters, documented with OpenAPI at `/api-docs` |
 
+The brief only required sorting by average stars. Adding two more sorts wasn't hard, so the list (and the API) can also be sorted **by title** and **by newest**. Each one is served by its own index, just like the rating sort.
+
 ## Screenshots
 
 **Movie list, best rated first**
