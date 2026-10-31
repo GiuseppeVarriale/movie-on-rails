@@ -6,8 +6,9 @@ module MoviesHelper
     t("movies.movie.location", name: location.name, country: location.country)
   end
 
-  def card_actors(movie)
-    shown_and_hidden(movie.actors.sort_by(&:name), CARD_ACTORS_LIMIT)
+  def card_actors(movie, first: nil)
+    actors = movie.actors.sort_by { |actor| [ actor == first ? 0 : 1, actor.name ] }
+    shown_and_hidden(actors, CARD_ACTORS_LIMIT)
   end
 
   def card_locations(movie)

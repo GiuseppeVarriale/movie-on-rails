@@ -2,7 +2,7 @@ class MoviesController < ApplicationController
   PER_PAGE = 12
 
   def index
-    @search = MovieSearch.new(sort: params[:sort])
+    @search = MovieSearch.new(sort: params[:sort], actor_id: params[:actor_id], actor: params[:actor])
     @pagy, @movies = pagy(:offset, @search.results, limit: PER_PAGE)
   end
 end
