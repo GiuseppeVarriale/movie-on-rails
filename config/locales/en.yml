@@ -5,4 +5,16 @@ en:
       empty_file: "%{path} is empty"
       file_not_found: "%{path} doesn't exist"
       movie_not_found: "Movie \"%{title}\" not found"
+      not_csv: "%{path} is not a valid CSV file"
       unknown_format: "%{path} has unrecognized headers (%{headers}). Expected %{expected}"
+    report:
+      imported: "%{kind} %{path}: %{status}, %{processed} rows, %{failed} failed"
+      skipped: "%{kind} %{path}: skipped (already imported)"
+      failure: "  line %{line}: %{errors}"
+      more_failures:
+        one: "  ... and 1 more failed row"
+        other: "  ... and %{count} more failed rows"
+      status_line: "#%{id} %{created_at} %{summary}"
+      no_imports: "No imports yet"
+    rake:
+      usage: 'Usage: bin/rails import:csv FILES="movies.csv reviews.csv"'
