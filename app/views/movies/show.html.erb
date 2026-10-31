@@ -1,0 +1,82 @@
+<% content_for :title, @movie.title %>
+
+<article aria-labelledby="movie-title">
+  <%= link_to t(".back"), movies_path, class: "text-sm font-medium text-brand-60 hover:underline" %>
+
+  <header class="mt-8">
+    <p class="eyebrow"><%= @movie.year %></p>
+    <h1 id="movie-title" class="mt-3 text-h2 sm:text-h1"><%= @movie.title %></h1>
+    <p class="mt-2 text-ink-60"><%= t("movies.movie.directed_by", director: @movie.director) %></p>
+
+    <div class="mt-5 flex flex-wrap items-center gap-3">
+      <%= render "shared/stars", average: @movie.average_stars, size: "text-2xl" %>
+      <% if @movie.average_stars %>
+        <span class="text-h5 font-semibold"><%= number_with_precision(@movie.average_stars, precision: 2) %></span>
+        <span class="text-ink-50"><%= t("movies.movie.reviews_count", count: @movie.ratings_count) %></span>
+      <% else %>
+        <span class="text-ink-50"><%= t("movies.movie.no_reviews") %></span>
+      <% end %>
+    </div>
+  </header>
+
+  <div class="mt-10 grid gap-10 lg:grid-cols-3">
+    <section class="lg:col-span-2" aria-labelledby="about-title">
+      <h2 id="about-title" class="eyebrow"><%= t(".about") %></h2>
+      <p class="mt-3 max-w-prose text-lg leading-relaxed text-ink-80"><%= @movie.description %></p>
+    </section>
+
+    <aside class="space-y-8">
+      <section aria-labelledby="cast-title">
+        <h2 id="cast-title" class="eyebrow"><%= t("movies.movie.cast") %></h2>
+        <ul class="mt-3 flex flex-wrap gap-2">
+          <% @movie.actors.sort_by(&:name).each do |actor| %>
+            <li>
+              <%= link_to actor.name, movies_path(actor_id: actor.id), title: t("movies.movie.filter_by", actor: actor.name),
+                    class: "block rounded-full bg-brand-5 px-3 py-1 text-sm font-medium text-brand-80 hover:bg-brand-10" %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+
+      <section aria-labelledby="locations-title">
+        <h2 id="locations-title" class="eyebrow"><%= t("movies.movie.filmed_in") %></h2>
+        <ul class="mt-3 space-y-1 text-ink-80">
+          <% @movie.filming_locations.sort_by(&:name).each do |location| %>
+            <li><%= filming_location_label(location) %></li>
+          <% end %>
+        </ul>
+      </section>
+    </aside>
+  </div>
+
+  <section class="mt-14 border-t border-ink-20 pt-10" aria-labelledby="reviews-title">
+    <h2 id="reviews-title" class="text-h4"><%= t(".reviews", count: @pagy.count) %></h2>
+
+    <% if @reviews.any? %>
+      <ol class="mt-6 space-y-4">
+        <% @reviews.each do |review| %>
+          <li id="<%= dom_id(review) %>" class="rounded-2xl border border-ink-20 p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <p class="font-semibold"><%= review.reviewer_name %></p>
+              <time datetime="<%= review.created_at.iso8601 %>" class="text-sm text-ink-50"><%= l(review.created_at.to_date, format: :long) %></time>
+            </div>
+            <div class="mt-2"><%= render "shared/stars", average: review.stars, precision: 0 %></div>
+            <% if review.body.present? %>
+              <p class="mt-3 text-ink-80"><%= review.body %></p>
+            <% else %>
+              <p class="mt-3 text-sm italic text-ink-50"><%= t(".no_text") %></p>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+
+      <% if @pagy.last > 1 %>
+        <div class="mt-8 flex justify-center">
+          <%== @pagy.series_nav(aria_label: t(".review_pages")) %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="mt-6 rounded-2xl bg-ink-5 px-6 py-10 text-center text-ink-60"><%= t(".no_reviews") %></p>
+    <% end %>
+  </section>
+</article>
