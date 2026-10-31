@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_180249) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_191743) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -77,6 +77,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_180249) do
     t.virtual "average_stars", type: :decimal, precision: 3, scale: 2, as: "\nCASE\n    WHEN (ratings_count = 0) THEN NULL::numeric\n    ELSE round(((ratings_sum)::numeric / (ratings_count)::numeric), 2)\nEND", stored: true
     t.index ["average_stars", "id"], name: "index_movies_on_average_stars", order: { average_stars: "DESC NULLS LAST", id: :desc }
     t.index ["title"], name: "index_movies_on_title", unique: true
+    t.index ["year", "title"], name: "index_movies_on_newest", order: { year: :desc }
     t.check_constraint "ratings_sum >= 0 AND ratings_count >= 0", name: "movies_ratings_non_negative"
   end
 
