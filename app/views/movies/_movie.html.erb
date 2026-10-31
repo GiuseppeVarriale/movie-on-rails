@@ -1,0 +1,31 @@
+<article id="<%= dom_id(movie) %>" class="flex flex-col rounded-2xl border border-ink-20 bg-white p-6 transition hover:border-brand-30 hover:shadow-md">
+  <header>
+    <p class="eyebrow"><%= movie.year %></p>
+    <h2 class="mt-2 text-h5 font-semibold"><%= movie.title %></h2>
+    <p class="mt-1 text-sm text-ink-60"><%= t(".directed_by", director: movie.director) %></p>
+  </header>
+
+  <div class="mt-4 flex items-center gap-3">
+    <%= render "shared/stars", average: movie.average_stars %>
+    <% if movie.average_stars %>
+      <span class="font-semibold"><%= number_with_precision(movie.average_stars, precision: 2) %></span>
+      <span class="text-sm text-ink-50"><%= t(".reviews_count", count: movie.ratings_count) %></span>
+    <% else %>
+      <span class="text-sm text-ink-50"><%= t(".no_reviews") %></span>
+    <% end %>
+  </div>
+
+  <div class="mt-5">
+    <h3 class="sr-only"><%= t(".cast") %></h3>
+    <ul class="flex flex-wrap gap-2" aria-label="<%= t(".cast") %>">
+      <% movie.actors.sort_by(&:name).each do |actor| %>
+        <li class="rounded-full bg-brand-5 px-3 py-1 text-xs font-medium text-brand-80"><%= actor.name %></li>
+      <% end %>
+    </ul>
+  </div>
+
+  <p class="mt-auto pt-5 text-sm text-ink-60">
+    <span class="font-semibold text-brand-90"><%= t(".filmed_in") %></span>
+    <%= movie.filming_locations.sort_by(&:name).map { |location| t(".location", name: location.name, country: location.country) }.to_sentence %>
+  </p>
+</article>

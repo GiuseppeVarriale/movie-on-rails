@@ -88,4 +88,24 @@
   .eyebrow {
     @apply text-xs font-bold uppercase tracking-widest text-brand-60;
   }
+
+  .pagy {
+    @apply flex flex-wrap items-center gap-1 text-sm font-medium;
+
+    a {
+      @apply rounded-full px-3 py-2 text-brand-90;
+    }
+
+    a[href]:hover {
+      @apply bg-brand-5;
+    }
+
+    a[aria-current="page"] {
+      @apply bg-brand-90 text-white;
+    }
+
+    a[aria-disabled="true"]:not([aria-current]) {
+      @apply text-ink-40;
+    }
+  }
 }
