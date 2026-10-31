@@ -22,6 +22,7 @@ Rails.application.routes.draw do
       resources :movies, only: %i[index show] do
         resources :reviews, only: :index
       end
+      resources :actors, only: :index
     end
   end
 end
