@@ -18,7 +18,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_121317) do
     t.string "title", null: false
     t.text "description", null: false
     t.integer "year", null: false
-    t.string "director"
+    t.string "director", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["title"], name: "index_movies_on_title", unique: true
