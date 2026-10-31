@@ -1,0 +1,14 @@
+class Movie < ApplicationRecord
+  # "Roundhay Garden Scene" (Louis Le Prince, 1888), the oldest surviving film.
+  FIRST_FILM_YEAR = 1888
+
+  normalizes :title, :director, with: ->(value) { value.squish }
+
+  validates :title, presence: true, uniqueness: true
+  validates :description, presence: true
+  validates :year, numericality: {
+    only_integer: true,
+    greater_than_or_equal_to: FIRST_FILM_YEAR,
+    less_than_or_equal_to: ->(_movie) { Date.current.year }
+  }, allow_nil: true
+end
