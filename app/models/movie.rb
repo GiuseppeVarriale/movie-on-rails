@@ -10,7 +10,7 @@ class Movie < ApplicationRecord
 
   normalizes :title, :director, with: ->(value) { value.squish }
 
-  validates :title, presence: true, uniqueness: true
+  validates :title, presence: true, uniqueness: { on: %i[create update] }
   validates :description, :director, presence: true
   validates :year, presence: true, numericality: {
     only_integer: true,
