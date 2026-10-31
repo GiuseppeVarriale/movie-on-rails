@@ -75,6 +75,15 @@ RSpec.configure do |config|
               created_at: { type: :string, format: "date-time" }
             }
           },
+          actor: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              name: { type: :string },
+              movies_count: { type: :integer },
+              movies_url: { type: :string, format: :uri, description: "The actor's movies" }
+            }
+          },
           pagination:,
           error: {
             type: :object,
