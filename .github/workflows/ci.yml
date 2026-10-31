@@ -65,3 +65,51 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd="pg_isready -U postgres" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    env:
+      RAILS_ENV: test
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Fail on generated spec placeholders
+        run: |
+          if grep -rn 'pending "add some examples' spec/; then
+            echo "::error::Complete or delete the generated pending specs above"
+            exit 1
+          fi
+
+      - name: Create database.yml from template
+        run: cp config/database.example.yml config/database.yml
+
+      - name: Build CSS
+        run: bin/rails tailwindcss:build
+
+      - name: Prepare test database
+        run: bin/rails db:prepare
+
+      - name: Run specs
+        run: bin/rspec
+
