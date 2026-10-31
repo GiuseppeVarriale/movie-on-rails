@@ -18,22 +18,9 @@ class ActorSearch
   def results
     return [] unless searchable?
 
-    actors = Actor.where(name_text.matches("%#{escaped_query}%"))
-                  .order(Arel::Nodes::Descending.new(name_text.matches("#{escaped_query}%")), :name)
-                  .limit(LIMIT)
-                  .to_a
+    actors = Actor.name_contains(query).order_by_prefix_match(query).order(:name).limit(LIMIT).to_a
     movies_counts = MovieActor.where(actor: actors).group(:actor_id).count
 
     actors.map { |actor| Suggestion.new(actor:, movies_count: movies_counts.fetch(actor.id, 0)) }
-  end
-
-  private
-
-  def name_text
-    Arel::Nodes::NamedFunction.new("CAST", [ Actor.arel_table[:name].as("text") ])
-  end
-
-  def escaped_query
-    Actor.sanitize_sql_like(query)
   end
 end
