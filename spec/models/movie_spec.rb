@@ -45,6 +45,22 @@ RSpec.describe Movie, type: :model do
         .to change(MovieFilmingLocation, :count).by(-1)
         .and not_change(FilmingLocation, :count)
     end
+
+    it { is_expected.to have_many(:reviews).dependent(:destroy) }
+
+    it "lists its reviews" do
+      movie = create(:movie)
+      reviews = create_list(:review, 2, movie:)
+
+      expect(movie.reload.reviews).to match_array(reviews)
+    end
+
+    it "deletes its reviews when destroyed" do
+      movie = create(:movie)
+      create_list(:review, 2, movie:)
+
+      expect { movie.destroy }.to change(Review, :count).by(-2)
+    end
   end
 
   describe "database" do
