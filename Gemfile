@@ -74,6 +74,8 @@ end
 group :test do
   # One-liner matchers for associations, validations and DB columns/indexes
   gem "shoulda-matchers", "~> 8.0"
+  # Cleans up after specs that can't run inside a transaction (e.g. threads)
+  gem "database_cleaner-active_record", "~> 2.2"
 end
 
 gem "dotenv", "~> 3.2", groups: [ :development, :test ]
