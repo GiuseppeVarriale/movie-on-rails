@@ -1,1 +1,91 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-5: #e5f5fa;
+  --color-brand-10: #cbeaf4;
+  --color-brand-20: #9fd9ea;
+  --color-brand-30: #73c8df;
+  --color-brand-40: #41b9d7;
+  --color-brand-50: #23a0c1;
+  --color-brand-60: #0080a9;
+  --color-brand-70: #006e91;
+  --color-brand-80: #005875;
+  --color-brand-90: #003b4d;
+
+  --color-mint-30: #aeead1;
+  --color-mint-50: #62d4a8;
+  --color-mint-70: #38a67b;
+  --color-mint-80: #1d8660;
+
+  --color-ink-5: #f7f9fa;
+  --color-ink-10: #edeff0;
+  --color-ink-20: #dce1e5;
+  --color-ink-30: #bfcad1;
+  --color-ink-40: #9ba6ae;
+  --color-ink-50: #6b767d;
+  --color-ink-60: #48525a;
+  --color-ink-80: #2d3439;
+
+  --color-error-10: #fff2f4;
+  --color-error-50: #cc0020;
+  --color-error-80: #760013;
+  --color-success-10: #e9f8f1;
+  --color-success-70: #38a67b;
+  --color-star: #f5b301;
+
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  --text-h1: 3.5rem;
+  --text-h1--line-height: 1.16;
+  --text-h1--font-weight: 500;
+  --text-h2: 2.25rem;
+  --text-h2--line-height: 1.18;
+  --text-h2--font-weight: 500;
+  --text-h4: 1.5rem;
+  --text-h4--line-height: 1.48;
+  --text-h4--font-weight: 500;
+  --text-h5: 1.125rem;
+  --text-h5--line-height: 1.56;
+  --text-h5--font-weight: 500;
+
+  --tracking-widest: 0.1em;
+  --default-transition-duration: 0.3s;
+}
+
+@utility bg-gradient-brand {
+  background-image: linear-gradient(to right in oklab, var(--color-brand-60), var(--color-mint-80));
+}
+
+@layer base {
+  body {
+    @apply bg-white font-sans text-brand-90 antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    @apply bg-brand-50 text-white;
+  }
+
+  :focus-visible {
+    @apply outline-3 outline-offset-3 outline-brand-50;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-widest text-brand-60;
+  }
+}

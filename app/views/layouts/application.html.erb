@@ -1,31 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= I18n.locale %>" class="h-full">
   <head>
-    <title><%= content_for(:title) || "Movie On Rails" %></title>
+    <title><%= content_for(:title) ? "#{content_for(:title)} · #{t('layout.app_name')}" : t("layout.app_name") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Movie On Rails">
+    <meta name="application-name" content="<%= t('layout.app_name') %>">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
+
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="flex min-h-full flex-col">
+    <header class="sticky top-0 z-20 bg-white shadow-md">
+      <nav class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-8" aria-label="<%= t('layout.navigation') %>">
+        <%= link_to t("layout.app_name"), root_path, class: "text-h5 font-semibold text-brand-90 hover:text-brand-60" %>
+        <%= link_to t("layout.nav.movies"), root_path, class: "rounded-sm px-3 py-2 font-medium text-brand-90 hover:bg-brand-5" %>
+      </nav>
+    </header>
+
+    <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-8 sm:py-14">
+      <%= render "layouts/flash" %>
       <%= yield %>
     </main>
+
+    <footer class="bg-brand-90 text-white">
+      <div class="mx-auto max-w-7xl px-4 py-8 text-sm text-brand-10 sm:px-8">
+        <%= t("layout.footer") %>
+      </div>
+    </footer>
   </body>
 </html>

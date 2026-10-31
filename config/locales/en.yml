@@ -23,3 +23,9 @@ en:
     recalculated:
       one: "Recalculated the ratings of 1 movie"
       other: "Recalculated the ratings of %{count} movies"
+  layout:
+    app_name: "Movies on Rails"
+    navigation: "Main"
+    nav:
+      movies: "Movies"
+    footer: "Movies on Rails · a movie review platform built with Ruby on Rails"
