@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_134747) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_160316) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -70,7 +70,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_134747) do
     t.string "director", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "ratings_sum", default: 0, null: false
+    t.integer "ratings_count", default: 0, null: false
+    t.virtual "average_stars", type: :decimal, precision: 3, scale: 2, as: "\nCASE\n    WHEN (ratings_count = 0) THEN NULL::numeric\n    ELSE round(((ratings_sum)::numeric / (ratings_count)::numeric), 2)\nEND", stored: true
+    t.index ["average_stars", "id"], name: "index_movies_on_average_stars", order: { average_stars: "DESC NULLS LAST", id: :desc }
     t.index ["title"], name: "index_movies_on_title", unique: true
+    t.check_constraint "ratings_sum >= 0 AND ratings_count >= 0", name: "movies_ratings_non_negative"
   end
 
   create_table "reviews", force: :cascade do |t|
