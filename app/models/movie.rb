@@ -5,7 +5,7 @@ class Movie < ApplicationRecord
   normalizes :title, :director, with: ->(value) { value.squish }
 
   validates :title, presence: true, uniqueness: true
-  validates :description, presence: true
+  validates :description, :director, presence: true
   validates :year, presence: true, numericality: {
     only_integer: true,
     greater_than_or_equal_to: FIRST_FILM_YEAR,

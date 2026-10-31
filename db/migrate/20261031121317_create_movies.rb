@@ -4,7 +4,7 @@ class CreateMovies < ActiveRecord::Migration[8.1]
       t.string :title, null: false
       t.text :description, null: false
       t.integer :year, null: false
-      t.string :director
+      t.string :director, null: false
 
       t.timestamps
     end
