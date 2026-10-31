@@ -1,11 +1,20 @@
 class Api::V1::MoviesController < Api::V1::BaseController
+  before_action :set_movie, only: :show
+
   def index
     @search = MovieSearch.new(sort: search_params[:sort], actor_id: search_params[:actor_id], actor: search_params[:actor])
     validate_search!
     @pagy, @movies = paginate(@search.results, search_params.slice(:page, :per_page))
   end
 
+  def show
+  end
+
   private
+
+  def set_movie
+    @movie = Movie.includes(:actors, :filming_locations).find(params.expect(:id))
+  end
 
   def search_params
     params.permit(:sort, :actor_id, :actor, :page, :per_page)

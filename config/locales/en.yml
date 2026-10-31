@@ -101,6 +101,7 @@ en:
       unrated: "Not rated yet"
   api:
     errors:
+      not_found: "%{resource} not found"
       invalid_parameter:
         one_of: "%{parameter} must be one of: %{values}"
         positive_integer: "%{parameter} must be a positive integer"
