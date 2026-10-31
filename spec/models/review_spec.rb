@@ -16,7 +16,7 @@ RSpec.describe Review, type: :model do
     it { is_expected.to have_db_column(:reviewer_name).of_type(:string).with_options(null: false) }
     it { is_expected.to have_db_column(:stars).of_type(:integer).with_options(null: false) }
     it { is_expected.to have_db_column(:body).of_type(:text).with_options(null: true) }
-    it { is_expected.to have_db_index(:movie_id) }
+    it { is_expected.to have_db_index([ :movie_id, :created_at, :id ]) }
 
     it "rejects a NULL reviewer name even when validations are skipped" do
       review.reviewer_name = nil
