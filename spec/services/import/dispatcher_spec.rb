@@ -64,6 +64,25 @@ RSpec.describe Import::Dispatcher do
     end
   end
 
+  describe ".check!" do
+    it "accepts files it can import" do
+      expect(described_class.check!([ movies_csv, reviews_csv ])).to be(true)
+    end
+
+    it "raises for a missing file" do
+      expect { described_class.check!([ "missing.csv" ]) }.to raise_error(described_class::FileNotFoundError)
+    end
+
+    it "raises for unknown headers" do
+      expect { described_class.check!([ csv_file("Title,Rating\n") ]) }
+        .to raise_error(Import::KindDetector::UnknownFormatError)
+    end
+
+    it "imports nothing" do
+      expect { described_class.check!([ movies_csv, reviews_csv ]) }.not_to change(Import, :count)
+    end
+  end
+
   describe "IMPORTERS" do
     it "has an importer for every Import kind" do
       expect(described_class::IMPORTERS.keys).to match_array(Import.kinds.keys)
