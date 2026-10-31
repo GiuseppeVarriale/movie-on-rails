@@ -9,6 +9,6 @@ class MoviesController < ApplicationController
 
   def show
     @movie = Movie.includes(:actors, :filming_locations).find(params[:id])
-    @pagy, @reviews = pagy(:offset, @movie.reviews.order(created_at: :desc, id: :desc), limit: REVIEWS_PER_PAGE)
+    @pagy, @reviews = pagy(:offset, @movie.reviews.newest_first, limit: REVIEWS_PER_PAGE)
   end
 end
