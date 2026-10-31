@@ -19,3 +19,7 @@ en:
     rake:
       queued: "Import queued (job %{job_id}). Follow it with bin/rails import:status or at /sidekiq"
       usage: 'Usage: bin/rails import:csv FILES="movies.csv reviews.csv" [INLINE=1]'
+  ratings:
+    recalculated:
+      one: "Recalculated the ratings of 1 movie"
+      other: "Recalculated the ratings of %{count} movies"
