@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :import do
     kind { :movies }
-    source_path { "db/data/#{kind}.csv" }
+    source_path { Faker::File.file_name(ext: "csv") }
     file_checksum { Faker::Crypto.sha256 }
 
     trait :completed do
