@@ -26,6 +26,25 @@ RSpec.describe Movie, type: :model do
         .to change(MovieActor, :count).by(-1)
         .and not_change(Actor, :count)
     end
+
+    it { is_expected.to have_many(:movie_filming_locations).dependent(:destroy) }
+    it { is_expected.to have_many(:filming_locations).through(:movie_filming_locations) }
+
+    it "lists its filming locations" do
+      movie = create(:movie)
+      los_angeles, bedfordshire = create_list(:filming_location, 2)
+      movie.filming_locations << [ los_angeles, bedfordshire ]
+
+      expect(movie.reload.filming_locations).to contain_exactly(los_angeles, bedfordshire)
+    end
+
+    it "removes its location links but keeps the locations when destroyed" do
+      movie_filming_location = create(:movie_filming_location)
+
+      expect { movie_filming_location.movie.destroy }
+        .to change(MovieFilmingLocation, :count).by(-1)
+        .and not_change(FilmingLocation, :count)
+    end
   end
 
   describe "database" do

@@ -7,6 +7,50 @@ RSpec.describe FilmingLocation, type: :model do
     it { is_expected.to be_valid }
   end
 
+  describe "associations" do
+    it { is_expected.to have_many(:movie_filming_locations).dependent(:restrict_with_error) }
+    it { is_expected.to have_many(:movies).through(:movie_filming_locations) }
+
+    it "lists every movie filmed there" do
+      location = create(:filming_location)
+      gone_in_60_seconds, inception = create_list(:movie, 2)
+      location.movies << [ gone_in_60_seconds, inception ]
+
+      expect(location.reload.movies).to contain_exactly(gone_in_60_seconds, inception)
+    end
+  end
+
+  describe "#destroy" do
+    context "when the location is used by a movie" do
+      let!(:movie_filming_location) { create(:movie_filming_location) }
+      let(:location) { movie_filming_location.filming_location }
+
+      it "is not allowed" do
+        expect(location.destroy).to be(false)
+      end
+
+      it "explains why" do
+        location.destroy
+
+        expect(location.errors[:base]).to include(/dependent movie filming locations exist/)
+      end
+
+      it "keeps the location and its movie links" do
+        expect { location.destroy }
+          .to not_change(described_class, :count)
+          .and not_change(MovieFilmingLocation, :count)
+      end
+    end
+
+    context "when the location is used by no movie" do
+      it "is allowed" do
+        location = create(:filming_location)
+
+        expect { location.destroy }.to change(described_class, :count).by(-1)
+      end
+    end
+  end
+
   describe "database" do
     it { is_expected.to have_db_column(:name).of_type(:citext).with_options(null: false) }
     it { is_expected.to have_db_column(:country).of_type(:string).with_options(null: false) }
