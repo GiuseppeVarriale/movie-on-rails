@@ -51,9 +51,19 @@ class Import::CsvImporter
 
   def start_import
     checksum = Digest::SHA256.file(path).hexdigest
-    raise AlreadyImportedError, I18n.t("imports.errors.already_imported", path:) if Import.completed.exists?(file_checksum: checksum)
+    raise already_imported if Import.active.exists?(file_checksum: checksum)
 
     Import.create!(kind:, source_path: path, file_checksum: checksum, status: :running, started_at: Time.current)
+  rescue ActiveRecord::RecordNotUnique
+    raise already_imported
+  rescue ActiveRecord::RecordInvalid => error
+    raise already_imported if error.record.errors.of_kind?(:file_checksum, :taken)
+
+    raise
+  end
+
+  def already_imported
+    AlreadyImportedError.new(I18n.t("imports.errors.already_imported", path:))
   end
 
   def each_batch(&)

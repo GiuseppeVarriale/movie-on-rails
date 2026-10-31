@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_160316) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_160510) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -42,7 +42,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_160316) do
     t.datetime "finished_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["file_checksum"], name: "index_imports_on_completed_file_checksum", unique: true, where: "((status)::text = 'completed'::text)"
+    t.index ["file_checksum"], name: "index_imports_on_active_file_checksum", unique: true, where: "((status)::text = ANY ((ARRAY['running'::character varying, 'completed'::character varying])::text[]))"
   end
 
   create_table "movie_actors", force: :cascade do |t|
