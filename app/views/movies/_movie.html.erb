@@ -15,17 +15,25 @@
     <% end %>
   </div>
 
+  <% actors, hidden_actors = card_actors(movie) %>
   <div class="mt-5">
     <h3 class="sr-only"><%= t(".cast") %></h3>
     <ul class="flex flex-wrap gap-2" aria-label="<%= t(".cast") %>">
-      <% movie.actors.sort_by(&:name).each do |actor| %>
+      <% actors.each do |actor| %>
         <li class="rounded-full bg-brand-5 px-3 py-1 text-xs font-medium text-brand-80"><%= actor.name %></li>
+      <% end %>
+      <% if hidden_actors.positive? %>
+        <li class="rounded-full bg-ink-10 px-3 py-1 text-xs font-medium text-ink-60"><%= t(".more", count: hidden_actors) %></li>
       <% end %>
     </ul>
   </div>
 
+  <% locations, hidden_locations = card_locations(movie) %>
   <p class="mt-auto pt-5 text-sm text-ink-60">
     <span class="font-semibold text-brand-90"><%= t(".filmed_in") %></span>
-    <%= movie.filming_locations.sort_by(&:name).map { |location| t(".location", name: location.name, country: location.country) }.to_sentence %>
+    <%= locations.map { |location| filming_location_label(location) }.join(t(".separator")) %>
+    <% if hidden_locations.positive? %>
+      <span class="ml-1 whitespace-nowrap rounded-full bg-ink-10 px-2 py-0.5 text-xs font-medium"><%= t(".more", count: hidden_locations) %></span>
+    <% end %>
   </p>
 </article>
