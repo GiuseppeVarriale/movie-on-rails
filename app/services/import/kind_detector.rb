@@ -29,16 +29,18 @@ class Import::KindDetector
 
   def read_headers
     first_line = File.open(path, encoding: "bom|utf-8", &:gets)
-    raise UnknownFormatError, I18n.t("imports.errors.empty_file", path:) if first_line.blank?
+    raise UnknownFormatError, I18n.t("imports.errors.empty_file", path:, expected: accepted_formats) if first_line.blank?
 
     CSV.parse_line(first_line).map { |header| header.to_s.squish.downcase }
   rescue CSV::MalformedCSVError
-    raise UnknownFormatError, I18n.t("imports.errors.not_csv", path:)
+    raise UnknownFormatError, I18n.t("imports.errors.not_csv", path:, expected: accepted_formats)
   end
 
   def unknown_headers_message(headers)
-    expected = HEADERS.map { |kind, columns| "#{kind} (#{columns.join(', ')})" }.join("; ")
+    I18n.t("imports.errors.unknown_format", path:, headers: headers.join(", "), expected: accepted_formats)
+  end
 
-    I18n.t("imports.errors.unknown_format", path:, headers: headers.join(", "), expected:)
+  def accepted_formats
+    HEADERS.map { |kind, columns| "#{kind} (#{columns.map(&:capitalize).join(', ')})" }.join("; ")
   end
 end

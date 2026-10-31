@@ -2,10 +2,10 @@ en:
   imports:
     errors:
       already_imported: "%{path} has already been imported"
-      empty_file: "%{path} is empty"
+      empty_file: "%{path} is empty. Expected %{expected}"
       file_not_found: "%{path} doesn't exist"
       movie_not_found: "Movie \"%{title}\" not found"
-      not_csv: "%{path} is not a valid CSV file"
+      not_csv: "%{path} is not a valid CSV file. Expected %{expected}"
       unknown_format: "%{path} has unrecognized headers (%{headers}). Expected %{expected}"
     report:
       imported: "%{kind} %{path}: %{status}, %{processed} rows, %{failed} failed"
