@@ -51,7 +51,11 @@ en:
       no_reviews: "No reviews yet"
       cast: "Cast"
       filmed_in: "Filmed in"
-      location: "%{name}, %{country}"
+      location: "%{name} (%{country})"
+      separator: " · "
+      more:
+        one: "+1 more"
+        other: "+%{count} more"
   shared:
     stars:
       rated: "Rated %{average} out of %{max}"
