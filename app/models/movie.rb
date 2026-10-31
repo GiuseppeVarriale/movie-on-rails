@@ -6,6 +6,7 @@ class Movie < ApplicationRecord
   has_many :actors, through: :movie_actors
   has_many :movie_filming_locations, dependent: :destroy
   has_many :filming_locations, through: :movie_filming_locations
+  has_many :reviews, dependent: :destroy
 
   normalizes :title, :director, with: ->(value) { value.squish }
 
