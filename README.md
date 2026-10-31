@@ -33,6 +33,7 @@ Even though it's a small project, it was a lot of fun to build. Every decision b
 - [Importing the CSV files](#importing-the-csv-files)
 - [The JSON API](#the-json-api)
 - [Decisions and why](#decisions-and-why)
+- [Queries and indexes](#queries-and-indexes)
 - [Evidence](#evidence)
 - [Testing](#testing)
 - [How the project was built](#how-the-project-was-built)
@@ -239,6 +240,67 @@ This was the central question of the project. Computing `AVG(stars)` on every pa
 - **Configuration and secrets stay out of the code:**
   - `config/database.yml` and `.env` are git-ignored;
   - `config/database.example.yml` and `.env.example` are versioned templates.
+
+## Queries and indexes
+
+Every query the app runs on a hot path is listed below, with the SQL Rails generates and the index that serves it. The plans come from `EXPLAIN` (with `enable_seqscan = off` on the small sample, to show which index *can* serve each query). The actor search was also measured on 200,000 actors (see [Evidence](#evidence)).
+
+### The index types used
+
+- **B-tree** (the default) keeps values **ordered**. It serves `=`, ranges, `ORDER BY` and prefixes, so an `ORDER BY ... LIMIT 12` reads the first 12 entries and stops, with no sorting.
+- **GIN with trigrams** (`pg_trgm`) splits each name into 3-letter pieces ("leo" → `  l`, ` le`, `leo`, `eo `) and records which rows contain each piece. That's how a "contains" search (`ILIKE '%leo%'`) finds rows without reading the whole table, which a B-tree can't do. It's also why the search needs at least 3 letters.
+- **Leftmost prefix:** a composite index on `(movie_id, actor_id)` is ordered by `movie_id` first. It serves `WHERE movie_id = ?` on its own, but not `WHERE actor_id = ?`, which needs its own index.
+- **Partial index:** an index with a `WHERE`. It only covers the rows that match, which makes it possible to enforce uniqueness on part of a table.
+- **Expression index:** an index on an expression such as `name::text` instead of the raw column. The query must use the same expression for the index to be used.
+- **Stored generated column:** Postgres computes the value on every write and stores it, so it can be indexed like any other column.
+
+### Reading: the movie list
+
+| Query | SQL (simplified) | Index | Plan |
+|---|---|---|---|
+| Best rated first (default) | `ORDER BY average_stars DESC NULLS LAST, id DESC LIMIT 12` | `index_movies_on_average_stars` on `(average_stars DESC NULLS LAST, id DESC)` | `Index Scan`, no sort |
+| By title | `ORDER BY title LIMIT 12` | `index_movies_on_title` (unique) | `Index Scan`, no sort |
+| Newest | `ORDER BY year DESC, title LIMIT 12` | none yet | `Seq Scan` + `Sort` (see below) |
+| Movies of an actor | `WHERE id IN (SELECT movie_id FROM movie_actors WHERE actor_id = 2)` | `index_movie_actors_on_actor_id` | `Bitmap Index Scan`, combined with the rating index for the order |
+| Movies of actors matching a text | `WHERE id IN (SELECT movie_id FROM movie_actors WHERE actor_id IN (SELECT id FROM actors WHERE name::text ILIKE '%leo%'))` | `index_actors_on_name_trigram` + `index_movie_actors_on_actor_id` | Trigram lookup on the actors, then the join table |
+| Cast and locations of the 12 movies (preload) | `SELECT * FROM movie_actors WHERE movie_id IN (...)` | `index_movie_actors_on_movie_id_and_actor_id` (leftmost column) | `Bitmap Index Scan` |
+
+- **The rating sort is what the brief asked to make efficient.** The average is a stored generated column, so the index on it is ordered by rating, with unrated movies last. `id` breaks ties so pages are stable. Showing the best-rated page reads 12 index entries, however many movies or reviews there are.
+- **The actor filter is a subquery, not a JOIN.** A JOIN would return a movie once per matching actor, and removing those duplicates (`DISTINCT`) would get in the way of the rating index. With `IN (subquery)`, each movie appears once and the order still comes from the index.
+- **Newest has no index yet.** On a small catalogue the sort in memory is instantaneous; a `(year DESC, title)` index would serve it the same way as the other two sorts.
+
+### Reading: actor suggestions
+
+| Query | SQL (simplified) | Index | Plan |
+|---|---|---|---|
+| The 10 matching actors, prefix matches first | `WHERE name::text ILIKE '%leo%' ORDER BY name::text ILIKE 'leo%' DESC, name LIMIT 10` | `index_actors_on_name_trigram` (GIN, on the expression `name::text`) | `Bitmap Index Scan` on the trigram index, then a sort of the matches only |
+| Movie counts for those 10 | `SELECT actor_id, COUNT(*) FROM movie_actors WHERE actor_id IN (...10 ids) GROUP BY actor_id` | `index_movie_actors_on_actor_id` | `Bitmap Index Scan` |
+
+- **The trigram index is on `name::text`** because the trigram operators don't accept `citext`. The query uses the same cast, otherwise the index wouldn't be used.
+- **The 10 actors come first, then the counts.** Counting the movies of every matching actor and only then taking 10 (a JOIN with `GROUP BY`) was up to 12 times slower on 200,000 actors.
+
+### Reading: a movie's page and its reviews
+
+| Query | SQL (simplified) | Index | Plan |
+|---|---|---|---|
+| A page of reviews, newest first | `WHERE movie_id = 1 ORDER BY created_at DESC, id DESC LIMIT 10` | `index_reviews_on_movie_id_and_newest` on `(movie_id, created_at DESC, id DESC)` | `Index Scan`, no sort |
+
+- **Each movie's reviews are stored in the index already in page order**, so a page reads 10 entries.
+- **`id` breaks ties** between reviews imported in the same batch, which share `created_at`.
+- **By the leftmost prefix rule, this index also serves `WHERE movie_id = ?`** (the foreign key, `movie.reviews`). That's why it replaced the plain `movie_id` index instead of being added next to it.
+
+### Writing: the import
+
+| What | Index |
+|---|---|
+| A movie appears once (`ON CONFLICT (title)`), and reviews find their movie by title | `index_movies_on_title` (unique) |
+| An actor appears once, in any case | `index_actors_on_name` (unique, `citext`) |
+| A filming location appears once | `index_filming_locations_on_name_and_country` (unique) |
+| An actor or location is linked to a movie once | `index_movie_actors_on_movie_id_and_actor_id`, `index_movie_filming_locations_on_movie_and_location` (unique) |
+| A file is imported once, but a failed import can be retried | `index_imports_on_active_file_checksum`: unique **partial** index on `file_checksum` `WHERE status IN ('running', 'completed')` |
+
+- **The import relies on these unique indexes instead of checking row by row.** `insert_all` with `ON CONFLICT DO NOTHING` lets the database skip what already exists in one statement per batch.
+- **Every index has a cost:** each insert must update all the indexes of its table. That's why there is **no** extra `movie_id` index on `movie_actors`; the composite unique index already covers it.
 
 ## Evidence
 
