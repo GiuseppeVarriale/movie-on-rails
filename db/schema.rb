@@ -10,15 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_160510) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_171604) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "pg_trgm"
 
   create_table "actors", force: :cascade do |t|
     t.citext "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index "((name)::text) gin_trgm_ops", name: "index_actors_on_name_trigram", using: :gin
     t.index ["name"], name: "index_actors_on_name", unique: true
   end
 
