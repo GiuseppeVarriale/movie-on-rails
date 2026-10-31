@@ -1,6 +1,11 @@
 require "rails_helper"
 
 RSpec.describe Import::KindDetector do
+  let(:accepted_formats) do
+    "Expected movies (Movie, Description, Year, Director, Actor, Filming location, Country); " \
+      "reviews (Movie, User, Stars, Review)"
+  end
+
   describe ".call" do
     context "with the sample files" do
       it "detects the movies CSV" do
@@ -62,20 +67,21 @@ RSpec.describe Import::KindDetector do
         path = csv_file("Title\n")
 
         expect { described_class.call(path) }
-          .to raise_error(described_class::UnknownFormatError, /Expected movies \(.+\); reviews \(movie, user, stars, review\)/)
+          .to raise_error(described_class::UnknownFormatError, /#{Regexp.escape(accepted_formats)}\z/)
       end
 
       it "raises when the header line isn't valid CSV" do
         path = csv_file("source \"https://rubygems.org\"\n")
 
         expect { described_class.call(path) }
-          .to raise_error(described_class::UnknownFormatError, /is not a valid CSV file/)
+          .to raise_error(described_class::UnknownFormatError, /is not a valid CSV file\. #{Regexp.escape(accepted_formats)}\z/)
       end
 
       it "raises when the file is empty" do
         path = csv_file("")
 
-        expect { described_class.call(path) }.to raise_error(described_class::UnknownFormatError, /is empty/)
+        expect { described_class.call(path) }
+          .to raise_error(described_class::UnknownFormatError, /is empty\. #{Regexp.escape(accepted_formats)}\z/)
       end
     end
   end
