@@ -76,6 +76,9 @@ group :test do
   gem "shoulda-matchers", "~> 8.0"
   # Cleans up after specs that can't run inside a transaction (e.g. threads)
   gem "database_cleaner-active_record", "~> 2.2"
+  # Browser (system) specs driving headless Chrome without Selenium
+  gem "capybara", "~> 3.40"
+  gem "cuprite", "~> 0.20"
 end
 
 gem "dotenv", "~> 3.2", groups: [ :development, :test ]
