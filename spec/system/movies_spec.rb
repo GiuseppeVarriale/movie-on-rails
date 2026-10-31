@@ -17,8 +17,14 @@ RSpec.describe "Movie list", type: :system do
 
     within("article", text: "Inception") do
       expect(page).to have_text("2010").and have_text("Directed by Christopher Nolan")
-        .and have_text("2.75").and have_text("4 reviews").and have_text("BedfordShire, UK")
+        .and have_text("2.75").and have_text("4 reviews")
     end
+  end
+
+  it "shows the filming locations with their country" do
+    visit root_path
+
+    within("article", text: "Inception") { expect(page).to have_text("BedfordShire (UK) · Los Angeles (US)") }
   end
 
   it "shows the cast as chips" do
@@ -33,6 +39,15 @@ RSpec.describe "Movie list", type: :system do
     visit root_path
 
     expect(page).to have_css("[role='img'][aria-label='Rated 3.60 out of 5']")
+  end
+
+  it "keeps a card compact when a movie has many actors and locations" do
+    movie = Movie.find_by!(title: "Inception")
+    movie.actors << create_list(:actor, 3)
+    movie.filming_locations << create_list(:filming_location, 2)
+    visit root_path
+
+    within("article", text: "Inception") { expect(page).to have_text("+3 more").and have_text("+1 more") }
   end
 
   it "sorts by title" do
