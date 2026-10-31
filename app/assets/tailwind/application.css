@@ -82,6 +82,10 @@
   :focus-visible {
     @apply outline-3 outline-offset-3 outline-brand-50;
   }
+
+  input[type="search"]::-webkit-search-cancel-button {
+    appearance: none;
+  }
 }
 
 @layer components {

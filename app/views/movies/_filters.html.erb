@@ -1,0 +1,31 @@
+<%= form_with url: movies_path, method: :get, id: "movie-filters", class: "mt-8 max-w-md",
+      data: { turbo_frame: "movies", turbo_action: "advance", controller: "movie-filters" } do |form| %>
+  <% if search.params[:sort] %>
+    <%= form.hidden_field :sort, value: search.params[:sort] %>
+  <% end %>
+
+  <%= form.label :actor, t(".label"), class: "eyebrow" %>
+  <div class="relative mt-2"
+       data-controller="autocomplete"
+       data-autocomplete-url-value="<%= actors_path %>"
+       data-autocomplete-min-length-value="<%= ActorSearch::MIN_LENGTH %>"
+       data-autocomplete-delay-value="300"
+       data-action="autocomplete.change->movie-filters#submit">
+    <%= form.search_field :actor,
+          value: search.selected_actor&.name || search.actor,
+          placeholder: t(".placeholder"),
+          autocomplete: "off",
+          aria: { describedby: "actor-filter-hint" },
+          class: "peer w-full rounded-full border border-ink-30 bg-white px-5 py-3 pr-12 text-brand-90 placeholder:text-ink-50 focus:border-brand-60",
+          data: { autocomplete_target: "input", action: "input->movie-filters#clearActorId" } %>
+    <%= form.hidden_field :actor_id, value: search.actor_id, data: { autocomplete_target: "hidden", movie_filters_target: "actorId" } %>
+
+    <%= link_to "×", movies_path(search.params.except(:actor_id, :actor)),
+          data: { turbo_frame: "_top" }, aria: { label: t(".clear") }, title: t(".clear"),
+          class: "absolute top-1/2 right-3 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-xl text-ink-50 hover:bg-brand-5 hover:text-brand-90 peer-placeholder-shown:hidden" %>
+
+    <ul data-autocomplete-target="results" hidden
+        class="absolute z-10 mt-2 max-h-80 w-full overflow-auto rounded-lg border border-ink-20 bg-white p-1 shadow-md"></ul>
+  </div>
+  <p id="actor-filter-hint" class="mt-2 text-xs text-ink-50"><%= t(".hint", count: ActorSearch::MIN_LENGTH) %></p>
+<% end %>

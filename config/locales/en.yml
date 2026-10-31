@@ -34,6 +34,22 @@ en:
       eyebrow: "Catalogue"
       title: "Movies"
       pages: "Pages"
+      results:
+        all:
+          zero: "No movies"
+          one: "1 movie"
+          other: "%{count} movies"
+        actor:
+          zero: "No movies with %{actor}"
+          one: "1 movie with %{actor}"
+          other: "%{count} movies with %{actor}"
+        matching:
+          zero: "No movies with an actor matching \"%{text}\""
+          one: "1 movie with an actor matching \"%{text}\""
+          other: "%{count} movies with an actor matching \"%{text}\""
+      empty_filter:
+        title: "No movies with this actor"
+        clear: "Show all movies"
       sort:
         label: "Sort movies"
         rating: "Best rated"
@@ -51,11 +67,17 @@ en:
       no_reviews: "No reviews yet"
       cast: "Cast"
       filmed_in: "Filmed in"
+      filter_by: "Show movies with %{actor}"
       location: "%{name} (%{country})"
       separator: " · "
       more:
         one: "+1 more"
         other: "+%{count} more"
+    filters:
+      label: "Filter by actor"
+      placeholder: "Search an actor…"
+      hint: "Type at least %{count} letters"
+      clear: "Clear actor filter"
   actors:
     index:
       movies_count:

@@ -15,12 +15,18 @@
     <% end %>
   </div>
 
-  <% actors, hidden_actors = card_actors(movie) %>
+  <% actors, hidden_actors = card_actors(movie, first: local_assigns[:highlighted_actor]) %>
   <div class="mt-5">
     <h3 class="sr-only"><%= t(".cast") %></h3>
     <ul class="flex flex-wrap gap-2" aria-label="<%= t(".cast") %>">
       <% actors.each do |actor| %>
-        <li class="rounded-full bg-brand-5 px-3 py-1 text-xs font-medium text-brand-80"><%= actor.name %></li>
+        <li>
+          <%= link_to actor.name, movies_path(actor_id: actor.id),
+                data: { turbo_frame: "_top" }, title: t(".filter_by", actor: actor.name),
+                aria: { current: (actor == local_assigns[:highlighted_actor] ? "true" : nil) },
+                class: ["block rounded-full px-3 py-1 text-xs font-medium transition",
+                        actor == local_assigns[:highlighted_actor] ? "bg-brand-90 text-white" : "bg-brand-5 text-brand-80 hover:bg-brand-10"] %>
+        </li>
       <% end %>
       <% if hidden_actors.positive? %>
         <li class="rounded-full bg-ink-10 px-3 py-1 text-xs font-medium text-ink-60"><%= t(".more", count: hidden_actors) %></li>
