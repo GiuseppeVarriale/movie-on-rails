@@ -36,6 +36,8 @@ module MovieOnRails
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
+    config.active_job.queue_adapter = :sidekiq
+
     # Generators create RSpec specs and FactoryBot factories (never Minitest).
     # Every generated spec must be completed with real examples before committing.
     config.generators do |g|
