@@ -1,0 +1,42 @@
+require "csv"
+
+class Import::KindDetector
+  class UnknownFormatError < StandardError; end
+
+  HEADERS = {
+    "movies" => [ "movie", "description", "year", "director", "actor", "filming location", "country" ],
+    "reviews" => [ "movie", "user", "stars", "review" ]
+  }.freeze
+
+  def self.call(path)
+    new(path).call
+  end
+
+  def initialize(path)
+    @path = path
+  end
+
+  def call
+    headers = read_headers
+    kind, _expected = HEADERS.find { |_kind, expected| expected.sort == headers.sort }
+
+    kind || raise(UnknownFormatError, unknown_headers_message(headers))
+  end
+
+  private
+
+  attr_reader :path
+
+  def read_headers
+    first_line = File.open(path, encoding: "bom|utf-8", &:gets)
+    raise UnknownFormatError, "#{path} is empty" if first_line.blank?
+
+    CSV.parse_line(first_line).map { |header| header.to_s.squish.downcase }
+  end
+
+  def unknown_headers_message(headers)
+    expected = HEADERS.map { |kind, columns| "#{kind} (#{columns.join(', ')})" }.join("; ")
+
+    "#{path} has unrecognized headers (#{headers.join(', ')}). Expected #{expected}"
+  end
+end
