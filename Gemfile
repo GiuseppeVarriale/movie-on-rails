@@ -36,6 +36,9 @@ gem "csv", "~> 3.3"
 # Background jobs (Active Job adapter), backed by Redis
 gem "sidekiq", "~> 8.1"
 
+# Pagination
+gem "pagy", "~> 43.8"
+
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 
