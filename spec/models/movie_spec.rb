@@ -126,6 +126,7 @@ RSpec.describe Movie, type: :model do
     it { is_expected.to have_db_column(:year).of_type(:integer).with_options(null: false) }
     it { is_expected.to have_db_column(:director).of_type(:string).with_options(null: false) }
     it { is_expected.to have_db_index(:title).unique }
+    it { is_expected.to have_db_index([ :year, :title ]) }
 
     it "rejects a NULL title even when validations are skipped" do
       movie.title = nil

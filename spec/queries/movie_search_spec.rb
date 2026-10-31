@@ -42,6 +42,15 @@ RSpec.describe MovieSearch do
       expect(described_class.new(sort: "newest").results.where(year: 2010)).to eq([ inception, tenet ])
     end
 
+    it "reads every sort from an index instead of sorting in memory" do
+      ActiveRecord::Base.connection.execute("SET LOCAL enable_seqscan = off")
+
+      plans = MovieSearch::SORTS.keys.index_with { |sort| described_class.new(sort:).results.limit(12).explain.inspect }
+
+      expect(plans.transform_values { |plan| plan.include?("Index Scan") && plan.exclude?("Sort") })
+        .to eq("rating" => true, "title" => true, "newest" => true)
+    end
+
     it "preloads actors and filming locations" do
       results = described_class.new.results.to_a
 
