@@ -23,7 +23,7 @@ RSpec.describe ActorSearch do
 
   describe "#results" do
     before do
-      [ "Leonardo Di Caprio", "Cleo Laine", "Ellen Page", "Leo Woodall" ].each { |name| create(:actor, name:) }
+      [ "Leonardo Di Caprio", "Cleo Laine", "Ellen Page", "Leopold Stokowski" ].each { |name| create(:actor, name:) }
     end
 
     it "suggests nothing below 3 letters" do
@@ -31,11 +31,11 @@ RSpec.describe ActorSearch do
     end
 
     it "matches part of a name, ignoring case" do
-      expect(names("LEO")).to contain_exactly("Cleo Laine", "Leo Woodall", "Leonardo Di Caprio")
+      expect(names("LEO")).to contain_exactly("Cleo Laine", "Leonardo Di Caprio", "Leopold Stokowski")
     end
 
     it "lists names starting with the term first" do
-      expect(names("leo")).to eq([ "Leo Woodall", "Leonardo Di Caprio", "Cleo Laine" ])
+      expect(names("leo")).to eq([ "Leonardo Di Caprio", "Leopold Stokowski", "Cleo Laine" ])
     end
 
     it "treats % and _ literally" do
