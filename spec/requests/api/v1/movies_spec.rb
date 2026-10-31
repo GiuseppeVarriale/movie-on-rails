@@ -30,7 +30,8 @@ RSpec.describe "API v1 movies", type: :request do
       "description" => inception.description, "average_stars" => 4.5, "reviews_count" => 2,
       "actors" => [ { "id" => inception.actors.find_by!(name: "Elliot Page").id, "name" => "Elliot Page" },
                     { "id" => leo.id, "name" => "Leonardo Di Caprio" } ],
-      "filming_locations" => [ { "id" => inception.filming_locations.first.id, "name" => "Paris", "country" => "FR" } ]
+      "filming_locations" => [ { "id" => inception.filming_locations.first.id, "name" => "Paris", "country" => "FR" } ],
+      "url" => api_v1_movie_url(inception)
     }
   end
 
@@ -85,6 +86,31 @@ RSpec.describe "API v1 movies", type: :request do
         run_test! do
           expect(response.parsed_body.dig("error", "message")).to eq("sort must be one of: rating, title, newest")
         end
+      end
+    end
+  end
+
+  path "/api/v1/movies/{id}" do
+    parameter name: :id, in: :path, schema: { type: :integer }
+
+    get "Show a movie" do
+      tags "Movies"
+      produces "application/json"
+
+      response 200, "Movie" do
+        schema type: :object, properties: { movie: { "$ref" => "#/components/schemas/movie" } }
+        let(:id) { inception.id }
+
+        run_test! do
+          expect(response.parsed_body["movie"]).to include("title" => "Inception", "average_stars" => 4.5, "reviews_count" => 2)
+        end
+      end
+
+      response 404, "Movie not found" do
+        schema "$ref" => "#/components/schemas/error"
+        let(:id) { 0 }
+
+        run_test!
       end
     end
   end
@@ -209,6 +235,23 @@ RSpec.describe "API v1 movies", type: :request do
       get "/api/v1/movies.xml"
 
       expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "GET /api/v1/movies/:id" do
+    it "lists the whole cast by name" do
+      inception.actors << create(:actor, name: "Tom Hardy")
+
+      get api_v1_movie_path(inception)
+
+      expect(response.parsed_body.dig("movie", "actors").pluck("name")).to eq([ "Elliot Page", "Leonardo Di Caprio", "Tom Hardy" ])
+    end
+
+    it "returns 404 with a JSON error for an unknown movie" do
+      get api_v1_movie_path("abc")
+
+      expect([ response.status, response.parsed_body ])
+        .to eq([ 404, { "error" => { "code" => "not_found", "message" => "Movie not found" } } ])
     end
   end
 end
