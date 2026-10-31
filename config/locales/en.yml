@@ -99,3 +99,9 @@ en:
     stars:
       rated: "Rated %{average} out of %{max}"
       unrated: "Not rated yet"
+  api:
+    errors:
+      invalid_parameter:
+        one_of: "%{parameter} must be one of: %{values}"
+        positive_integer: "%{parameter} must be a positive integer"
+        min_length: "%{parameter} must have at least %{count} characters"
