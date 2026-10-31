@@ -1,0 +1,6 @@
+<% percentage = average ? (average / Review::MAX_STARS * 100).round(1) : 0 %>
+<span class="relative inline-block text-lg leading-none tracking-wider" role="img"
+      aria-label="<%= average ? t("shared.stars.rated", average: number_with_precision(average, precision: 2), max: Review::MAX_STARS) : t("shared.stars.unrated") %>">
+  <span class="text-ink-30" aria-hidden="true"><%= "★" * Review::MAX_STARS %></span>
+  <span class="absolute inset-0 overflow-hidden whitespace-nowrap text-star" style="width: <%= percentage %>%" aria-hidden="true"><%= "★" * Review::MAX_STARS %></span>
+</span>

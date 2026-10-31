@@ -33,3 +33,26 @@ en:
     index:
       eyebrow: "Catalogue"
       title: "Movies"
+      pages: "Pages"
+      sort:
+        label: "Sort movies"
+        rating: "Best rated"
+        title: "Title"
+        newest: "Newest"
+      empty:
+        title: "No movies yet"
+        hint_html: "Import them with %{command}"
+        command: 'bin/rails import:csv FILES="movies.csv reviews.csv"'
+    movie:
+      directed_by: "Directed by %{director}"
+      reviews_count:
+        one: "1 review"
+        other: "%{count} reviews"
+      no_reviews: "No reviews yet"
+      cast: "Cast"
+      filmed_in: "Filmed in"
+      location: "%{name}, %{country}"
+  shared:
+    stars:
+      rated: "Rated %{average} out of %{max}"
+      unrated: "Not rated yet"
