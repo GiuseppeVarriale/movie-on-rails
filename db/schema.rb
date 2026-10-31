@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_132433) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_133123) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -39,6 +39,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_132433) do
     t.index ["movie_id", "actor_id"], name: "index_movie_actors_on_movie_id_and_actor_id", unique: true
   end
 
+  create_table "movie_filming_locations", force: :cascade do |t|
+    t.bigint "movie_id", null: false
+    t.bigint "filming_location_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["filming_location_id"], name: "index_movie_filming_locations_on_filming_location_id"
+    t.index ["movie_id", "filming_location_id"], name: "index_movie_filming_locations_on_movie_and_location", unique: true
+  end
+
   create_table "movies", force: :cascade do |t|
     t.string "title", null: false
     t.text "description", null: false
@@ -51,4 +60,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_132433) do
 
   add_foreign_key "movie_actors", "actors"
   add_foreign_key "movie_actors", "movies"
+  add_foreign_key "movie_filming_locations", "filming_locations"
+  add_foreign_key "movie_filming_locations", "movies"
 end
