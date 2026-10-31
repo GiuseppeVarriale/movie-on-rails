@@ -16,4 +16,10 @@ Rails.application.routes.draw do
   root "movies#index"
   resources :movies, only: %i[index show]
   resources :actors, only: :index
+
+  namespace :api, defaults: { format: :json }, constraints: { format: :json } do
+    namespace :v1 do
+      resources :movies, only: :index
+    end
+  end
 end
