@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_133123) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_133904) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -58,8 +58,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_133123) do
     t.index ["title"], name: "index_movies_on_title", unique: true
   end
 
+  create_table "reviews", force: :cascade do |t|
+    t.bigint "movie_id", null: false
+    t.string "reviewer_name", null: false
+    t.integer "stars", null: false
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["movie_id"], name: "index_reviews_on_movie_id"
+  end
+
   add_foreign_key "movie_actors", "actors"
   add_foreign_key "movie_actors", "movies"
   add_foreign_key "movie_filming_locations", "filming_locations"
   add_foreign_key "movie_filming_locations", "movies"
+  add_foreign_key "reviews", "movies"
 end
