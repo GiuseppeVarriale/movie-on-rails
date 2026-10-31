@@ -30,6 +30,7 @@ Even though it's a small project, it was a lot of fun to build. Every decision b
 
 - [What it does](#what-it-does)
 - [Screenshots](#screenshots)
+- [Running the app](#running-the-app)
 - [Importing the CSV files](#importing-the-csv-files)
 - [The JSON API](#the-json-api)
 - [Decisions and why](#decisions-and-why)
@@ -73,12 +74,58 @@ The brief only required sorting by average stars. Adding two more sorts wasn't h
 
 <img src="docs/images/api-docs.png" alt="Swagger UI overview" width="820">
 
+## Running the app
+
+### With Docker Compose (recommended)
+
+You only need Docker. One command starts four containers from three images:
+
+| Container | Image | Role |
+|---|---|---|
+| `db` | `postgres:17` | Database |
+| `redis` | `redis:7` | Sidekiq's queue |
+| `web` | the app (`Dockerfile.dev`) | Rails (Puma) at http://localhost:3000 |
+| `worker` | the same app image | Sidekiq, which processes the imports |
+
+`web` and `worker` share one image but run as separate containers (one process per container), so the import queue never competes with page requests, and each can be restarted or followed in the logs on its own.
+
+```bash
+cp .env.example .env    # optional: passwords, ports and the Sidekiq dashboard login
+docker compose up       # first run builds the image; then http://localhost:3000
+```
+
+On start, `web` prepares the database (creates it and loads the schema) and builds the CSS. Then import the sample files; the `worker` container picks the job up:
+
+```bash
+docker compose exec web bin/rails import:csv FILES="movies.csv reviews.csv"
+docker compose exec web bin/rails import:status
+```
+
+- **Configuration:** the containers find each other by service name (`db:5432`, `redis:6379`), and `compose.yaml` sets that for them, so the same `.env` also works for running natively. Postgres and Redis are also published on your machine on **5433** and **6380**, so they don't clash with ones you may already run (`psql -h localhost -p 5433 -U postgres`).
+- **Your code is mounted into the containers,** so changes show up without rebuilding. The containers run with your user id, so the files they write in the project belong to you.
+- **Sidekiq dashboard:** `/sidekiq`, with the `SIDEKIQ_USERNAME` / `SIDEKIQ_PASSWORD` from `.env`. It stays locked without them.
+- **Tests:** `docker compose exec -e RAILS_ENV=test web bin/rspec --exclude-pattern "spec/system/**/*_spec.rb"`. The system specs need Chrome, which the image doesn't include; they run natively and on CI.
+- **Database collation:** the database uses `en_US.utf8`, the same as CI.
+- **jemalloc** keeps the memory of the long-running Ruby processes stable after big imports.
+- **To stop:** `docker compose down`. Add `-v` to also delete the database.
+
+### Natively
+
+You need Ruby 4.0.9 (`.ruby-version`; rbenv, asdf and mise read it — mise needs `idiomatic_version_file_enable_tools = ["ruby"]`), PostgreSQL and Redis.
+
+```bash
+bin/setup     # installs gems, creates .env and config/database.yml from their templates, prepares the database
+bin/dev       # web, Sidekiq worker and Tailwind watcher (Procfile.dev) at http://localhost:3000
+```
+
+`config/database.yml` and `.env` are git-ignored; their versioned templates are `config/database.example.yml` and `.env.example`.
+
 ## Importing the CSV files
 
 The two files from the brief are in the repository root: [`movies.csv`](movies.csv) and [`reviews.csv`](reviews.csv).
 
 ```bash
-# Queue the import in Sidekiq (the worker runs with bin/dev)
+# Queue the import in Sidekiq (the worker runs with bin/dev, or in the worker container)
 bin/rails import:csv FILES="movies.csv reviews.csv"
 
 # Or run it right in the terminal and see the report
@@ -372,7 +419,6 @@ The brief grades version control, so the history is meant to be read:
 - **Token authentication for the API**, if it becomes private. **Doorkeeper** (OAuth 2) or a similar solution would let external apps get tokens, with scopes such as read-only access.
 - **Rate limiting** for the API and the actor suggestions. Rails 8's built-in `rate_limit`, backed by the Redis cache store, would be shared across servers.
 - **Live updates.** With the review form in place, Turbo Streams over Action Cable could refresh ratings on open pages, throttled so that hundreds of ratings at once don't flood the browsers.
-- **Docker Compose** to start everything (Postgres, Redis, web, worker) with one command. It would also set the same database collation everywhere and use jemalloc to keep the Sidekiq worker's memory stable after big imports.
 - **Content Security Policy** and the remaining security hardening.
 
 ## Stack
@@ -386,6 +432,5 @@ The brief grades version control, so the history is meant to be read:
 | API | Jbuilder, OpenAPI with rswag |
 | Pagination | Pagy |
 | Tests | RSpec, FactoryBot, Faker, shoulda-matchers, Capybara + Cuprite |
+| Development environment | Docker Compose (PostgreSQL, Redis, web, Sidekiq worker) or native with `bin/dev` |
 | Quality | RuboCop, Brakeman, GitHub Actions |
-
-> Setup instructions (running locally and with Docker Compose) will be added in the next version of this README.
