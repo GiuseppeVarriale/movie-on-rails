@@ -31,7 +31,7 @@ RSpec.describe Import::ConsoleReport do
 
     it "reports a skipped file" do
       expect(described_class.for_results([ result_for(nil, path: "reviews.csv", kind: "reviews") ]))
-        .to eq([ "reviews reviews.csv: skipped (already imported)" ])
+        .to eq([ "reviews reviews.csv: skipped (already imported or being imported)" ])
     end
   end
 

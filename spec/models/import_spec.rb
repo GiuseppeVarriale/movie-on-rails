@@ -53,6 +53,16 @@ RSpec.describe Import, type: :model do
     it { is_expected.not_to allow_value("other").for(:status) }
   end
 
+  describe ".active" do
+    it "lists running and completed imports" do
+      running, completed = create(:import, status: :running), create(:import, :completed)
+      create(:import, status: :failed)
+      create(:import)
+
+      expect(described_class.active).to contain_exactly(running, completed)
+    end
+  end
+
   describe "defaults" do
     subject(:import) { described_class.new }
 
@@ -85,6 +95,22 @@ RSpec.describe Import, type: :model do
         import.file_checksum = checksum
 
         expect(import).to be_valid
+      end
+    end
+
+    describe "a file can't be imported twice at the same time" do
+      before { create(:import, status: :running, file_checksum: checksum) }
+
+      it "rejects a second running import of the same file" do
+        import.assign_attributes(status: :running, file_checksum: checksum)
+
+        expect(import).not_to be_valid
+      end
+
+      it "rejects it in the database even when validations are skipped" do
+        import.assign_attributes(status: :running, file_checksum: checksum)
+
+        expect { import.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
       end
     end
 
