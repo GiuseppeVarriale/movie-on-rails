@@ -70,7 +70,7 @@ RSpec.describe "API v1 movies", type: :request do
                        description: "The filters actually applied",
                        properties: {
                          sort: { type: :string, example: "rating" },
-                         actor_id: { type: :integer, nullable: true, example: nil },
+                         actor_id: { type: :integer, nullable: true },
                          actor: { type: :string, nullable: true, example: "leo" }
                        }
                      }

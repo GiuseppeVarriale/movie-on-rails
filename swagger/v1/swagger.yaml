@@ -132,7 +132,6 @@ paths:
                           actor_id:
                             type: integer
                             nullable: true
-                            example: 
                           actor:
                             type: string
                             nullable: true
@@ -375,7 +374,6 @@ components:
         prev_page:
           type: integer
           nullable: true
-          example: 
     error:
       type: object
       properties:
