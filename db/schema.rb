@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_133904) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_134747) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -28,6 +28,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_133904) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name", "country"], name: "index_filming_locations_on_name_and_country", unique: true
+  end
+
+  create_table "imports", force: :cascade do |t|
+    t.string "kind", null: false
+    t.string "status", default: "pending", null: false
+    t.string "source_path", null: false
+    t.string "file_checksum", null: false
+    t.integer "rows_processed", default: 0, null: false
+    t.integer "rows_failed", default: 0, null: false
+    t.jsonb "failures", default: [], null: false
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["file_checksum"], name: "index_imports_on_completed_file_checksum", unique: true, where: "((status)::text = 'completed'::text)"
   end
 
   create_table "movie_actors", force: :cascade do |t|
