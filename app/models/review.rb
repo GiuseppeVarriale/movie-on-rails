@@ -4,6 +4,8 @@ class Review < ApplicationRecord
 
   belongs_to :movie
 
+  scope :newest_first, -> { order(created_at: :desc, id: :desc) }
+
   normalizes :reviewer_name, with: ->(name) { name.squish }
 
   validates :reviewer_name, presence: true
