@@ -7,6 +7,50 @@ RSpec.describe Actor, type: :model do
     it { is_expected.to be_valid }
   end
 
+  describe "associations" do
+    it { is_expected.to have_many(:movie_actors).dependent(:restrict_with_error) }
+    it { is_expected.to have_many(:movies).through(:movie_actors) }
+
+    it "lists every movie the actor appears in" do
+      actor = create(:actor)
+      gone_in_60_seconds, inception = create_list(:movie, 2)
+      actor.movies << [ gone_in_60_seconds, inception ]
+
+      expect(actor.reload.movies).to contain_exactly(gone_in_60_seconds, inception)
+    end
+  end
+
+  describe "#destroy" do
+    context "when the actor appears in a movie" do
+      let!(:movie_actor) { create(:movie_actor) }
+      let(:actor) { movie_actor.actor }
+
+      it "is not allowed" do
+        expect(actor.destroy).to be(false)
+      end
+
+      it "explains why" do
+        actor.destroy
+
+        expect(actor.errors[:base]).to include(/dependent movie actors exist/)
+      end
+
+      it "keeps the actor and their cast links" do
+        expect { actor.destroy }
+          .to not_change(described_class, :count)
+          .and not_change(MovieActor, :count)
+      end
+    end
+
+    context "when the actor appears in no movie" do
+      it "is allowed" do
+        actor = create(:actor)
+
+        expect { actor.destroy }.to change(described_class, :count).by(-1)
+      end
+    end
+  end
+
   describe "database" do
     it { is_expected.to have_db_column(:name).of_type(:citext).with_options(null: false) }
     it { is_expected.to have_db_index(:name).unique }
