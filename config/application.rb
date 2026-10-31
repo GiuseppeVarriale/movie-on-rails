@@ -36,7 +36,19 @@ module MovieOnRails
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    # Don't generate system test files.
-    config.generators.system_tests = nil
+    # Generators create RSpec specs and FactoryBot factories (never Minitest).
+    # Every generated spec must be completed with real examples before committing.
+    config.generators do |g|
+      g.test_framework :rspec,
+                       fixtures: true,          # handled by fixture_replacement below
+                       view_specs: false,       # views are covered by request/system specs
+                       helper_specs: false,
+                       routing_specs: false,
+                       controller_specs: false, # request specs instead (RSpec/Rails recommendation)
+                       request_specs: true
+      g.fixture_replacement :factory_bot, dir: "spec/factories"
+      g.system_tests nil                        # system specs are written by hand
+      g.helper false
+    end
   end
 end
