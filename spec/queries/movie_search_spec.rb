@@ -48,4 +48,52 @@ RSpec.describe MovieSearch do
       expect(results).to all(satisfy { |movie| movie.association(:actors).loaded? && movie.association(:filming_locations).loaded? })
     end
   end
+
+  describe "actor filter" do
+    let!(:leo) { create(:actor, name: "Leonardo Di Caprio") }
+    let!(:ribisi) { create(:actor, name: "Giovani Ribisi") }
+
+    before do
+      gone_in_60_seconds.actors << [ leo, ribisi ]
+      inception.actors << leo
+    end
+
+    it "lists the movies of the actor given by id" do
+      expect(described_class.new(actor_id: ribisi.id.to_s).results).to eq([ gone_in_60_seconds ])
+    end
+
+    it "keeps the rating order while filtering" do
+      expect(described_class.new(actor_id: leo.id).results).to eq([ gone_in_60_seconds, inception ])
+    end
+
+    it "lists each movie once even when several of its actors match the text" do
+      gone_in_60_seconds.actors << create(:actor, name: "Leonard Nimoy")
+
+      expect(described_class.new(actor: "leonar").results.to_a).to eq([ gone_in_60_seconds, inception ])
+    end
+
+    it "filters by part of an actor's name, ignoring case" do
+      expect(described_class.new(actor: "RIBISI").results).to eq([ gone_in_60_seconds ])
+    end
+
+    it "ignores a text shorter than 3 letters" do
+      expect(described_class.new(actor: "ri")).not_to be_filtered_by_actor
+    end
+
+    it "ignores a non-numeric id" do
+      expect(described_class.new(actor_id: "abc")).not_to be_filtered_by_actor
+    end
+
+    it "prefers the id when both are given" do
+      expect(described_class.new(actor_id: ribisi.id, actor: "leonardo").results).to eq([ gone_in_60_seconds ])
+    end
+
+    it "exposes the selected actor" do
+      expect(described_class.new(actor_id: leo.id).selected_actor).to eq(leo)
+    end
+
+    it "builds params that keep the filter and a non-default sort" do
+      expect(described_class.new(sort: "title", actor_id: leo.id).params).to eq(sort: "title", actor_id: leo.id)
+    end
+  end
 end

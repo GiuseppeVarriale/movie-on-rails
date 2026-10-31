@@ -26,6 +26,16 @@ RSpec.describe MoviesHelper, type: :helper do
     end
   end
 
+  describe "#card_actors with a highlighted actor" do
+    it "puts that actor first so it's never hidden" do
+      actors = %w[Ann Bob Cal Dan Zoe].map { |name| create(:actor, name:) }
+      movie.actors << actors
+
+      shown, _hidden = helper.card_actors(movie, first: actors.last)
+      expect(shown.map(&:name)).to eq(%w[Zoe Ann Bob Cal])
+    end
+  end
+
   describe "#card_locations" do
     it "shows the first 3 alphabetically and counts the rest" do
       movie.filming_locations << %w[Rome Oslo Lima Kyiv Bern].map { |name| create(:filming_location, name:) }
