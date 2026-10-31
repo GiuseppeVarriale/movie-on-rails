@@ -3,5 +3,6 @@ en:
     errors:
       already_imported: "%{path} has already been imported"
       empty_file: "%{path} is empty"
+      file_not_found: "%{path} doesn't exist"
       movie_not_found: "Movie \"%{title}\" not found"
       unknown_format: "%{path} has unrecognized headers (%{headers}). Expected %{expected}"
