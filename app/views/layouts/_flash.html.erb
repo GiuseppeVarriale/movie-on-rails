@@ -1,0 +1,6 @@
+<% flash.each do |type, message| %>
+  <div role="<%= type.to_s == "alert" ? "alert" : "status" %>"
+       class="mb-8 rounded-lg border px-5 py-4 <%= type.to_s == "alert" ? "border-error-50 bg-error-10 text-error-80" : "border-mint-70 bg-success-10 text-brand-90" %>">
+    <%= message %>
+  </div>
+<% end %>
