@@ -16,12 +16,21 @@ class Import::Dispatcher
     new(paths).call
   end
 
+  def self.check!(paths)
+    new(paths).check!
+  end
+
   def initialize(paths)
     @paths = Array(paths).map(&:to_s)
   end
 
   def call
     files_in_import_order.map { |path, kind| import(path, kind) }
+  end
+
+  def check!
+    files_in_import_order
+    true
   end
 
   private

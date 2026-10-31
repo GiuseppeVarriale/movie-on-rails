@@ -17,4 +17,5 @@ en:
       status_line: "#%{id} %{created_at} %{summary}"
       no_imports: "No imports yet"
     rake:
-      usage: 'Usage: bin/rails import:csv FILES="movies.csv reviews.csv"'
+      queued: "Import queued (job %{job_id}). Follow it with bin/rails import:status or at /sidekiq"
+      usage: 'Usage: bin/rails import:csv FILES="movies.csv reviews.csv" [INLINE=1]'
