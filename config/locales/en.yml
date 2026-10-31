@@ -1,7 +1,7 @@
 en:
   imports:
     errors:
-      already_imported: "%{path} has already been imported"
+      already_imported: "%{path} has already been imported or is being imported"
       empty_file: "%{path} is empty. Expected %{expected}"
       file_not_found: "%{path} doesn't exist"
       movie_not_found: "Movie \"%{title}\" not found"
@@ -9,7 +9,7 @@ en:
       unknown_format: "%{path} has unrecognized headers (%{headers}). Expected %{expected}"
     report:
       imported: "%{kind} %{path}: %{status}, %{processed} rows, %{failed} failed"
-      skipped: "%{kind} %{path}: skipped (already imported)"
+      skipped: "%{kind} %{path}: skipped (already imported or being imported)"
       failure: "  line %{line}: %{errors}"
       more_failures:
         one: "  ... and 1 more failed row"
