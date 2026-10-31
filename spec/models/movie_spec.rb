@@ -103,6 +103,22 @@ RSpec.describe Movie, type: :model do
   end
 
   describe "validations" do
+    describe "in the import context" do
+      before { create(:movie, title: "Inception") }
+
+      it "skips the title uniqueness check (the database enforces it on insert)" do
+        movie.title = "Inception"
+
+        expect(movie.valid?(:import)).to be(true)
+      end
+
+      it "still applies the other rules" do
+        movie.assign_attributes(title: "Inception", year: 1700)
+
+        expect(movie.valid?(:import)).to be(false)
+      end
+    end
+
     it { is_expected.to validate_presence_of(:title) }
     it { is_expected.to validate_uniqueness_of(:title) }
     it { is_expected.to validate_presence_of(:description) }

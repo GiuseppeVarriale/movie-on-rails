@@ -77,6 +77,22 @@ RSpec.describe FilmingLocation, type: :model do
   end
 
   describe "validations" do
+    describe "in the import context" do
+      before { create(:filming_location, name: "Los Angeles", country: "US") }
+
+      it "skips the name/country uniqueness check (the database enforces it on insert)" do
+        location.assign_attributes(name: "los angeles", country: "US")
+
+        expect(location.valid?(:import)).to be(true)
+      end
+
+      it "still checks the country format" do
+        location.assign_attributes(name: "los angeles", country: "USA")
+
+        expect(location.valid?(:import)).to be(false)
+      end
+    end
+
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_presence_of(:country) }
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:country).ignoring_case_sensitivity }
