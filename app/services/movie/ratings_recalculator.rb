@@ -5,7 +5,7 @@ class Movie::RatingsRecalculator
 
   def call
     Movie.transaction do
-      Movie.order(:id).lock.ids
+      Movie.order(:id).lock("FOR NO KEY UPDATE").ids
       Movie.update_all(ratings_sum: total("COALESCE(SUM(reviews.stars), 0)"), ratings_count: total("COUNT(*)"))
     end
   end
