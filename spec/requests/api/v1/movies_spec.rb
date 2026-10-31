@@ -64,9 +64,9 @@ RSpec.describe "API v1 movies", type: :request do
                        type: :object,
                        description: "The filters actually applied",
                        properties: {
-                         sort: { type: :string },
-                         actor_id: { type: :integer, nullable: true },
-                         actor: { type: :string, nullable: true }
+                         sort: { type: :string, example: "rating" },
+                         actor_id: { type: :integer, nullable: true, example: nil },
+                         actor: { type: :string, nullable: true, example: "leo" }
                        }
                      }
                    }
@@ -81,6 +81,12 @@ RSpec.describe "API v1 movies", type: :request do
 
       response 400, "Invalid parameter" do
         schema "$ref" => "#/components/schemas/error"
+        example "application/json", :unknown_sort,
+                { error: { code: "invalid_parameter", message: "sort must be one of: rating, title, newest" } }
+        example "application/json", :invalid_actor_id,
+                { error: { code: "invalid_parameter", message: "actor_id must be a positive integer" } }
+        example "application/json", :short_actor,
+                { error: { code: "invalid_parameter", message: "actor must have at least 3 characters" } }
         let(:sort) { "popularity" }
 
         run_test! do
@@ -108,6 +114,7 @@ RSpec.describe "API v1 movies", type: :request do
 
       response 404, "Movie not found" do
         schema "$ref" => "#/components/schemas/error"
+        example "application/json", :movie_not_found, { error: { code: "not_found", message: "Movie not found" } }
         let(:id) { 0 }
 
         run_test!

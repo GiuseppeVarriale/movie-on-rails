@@ -24,7 +24,7 @@ RSpec.describe "API v1 actors", type: :request do
         schema type: :object,
                properties: {
                  actors: { type: :array, items: { "$ref" => "#/components/schemas/actor" } },
-                 meta: { type: :object, properties: { q: { type: :string }, limit: { type: :integer } } }
+                 meta: { type: :object, properties: { q: { type: :string, example: "leo" }, limit: { type: :integer, example: 10 } } }
                }
         let(:q) { "leo" }
 
@@ -35,6 +35,7 @@ RSpec.describe "API v1 actors", type: :request do
 
       response 400, "Missing or too short q" do
         schema "$ref" => "#/components/schemas/error"
+        example "application/json", :short_q, { error: { code: "invalid_parameter", message: "q must have at least 3 characters" } }
         let(:q) { "le" }
 
         run_test!

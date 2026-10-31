@@ -25,7 +25,7 @@ RSpec.describe "API v1 reviews", type: :request do
                  reviews: { type: :array, items: { "$ref" => "#/components/schemas/review" } },
                  meta: {
                    type: :object,
-                   properties: { movie_id: { type: :integer }, pagination: { "$ref" => "#/components/schemas/pagination" } }
+                   properties: { movie_id: { type: :integer, example: 1 }, pagination: { "$ref" => "#/components/schemas/pagination" } }
                  }
                }
         let(:movie_id) { movie.id }
@@ -42,6 +42,7 @@ RSpec.describe "API v1 reviews", type: :request do
 
       response 404, "Movie not found" do
         schema "$ref" => "#/components/schemas/error"
+        example "application/json", :movie_not_found, { error: { code: "not_found", message: "Movie not found" } }
         let(:movie_id) { 0 }
 
         run_test!
