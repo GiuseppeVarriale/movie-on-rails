@@ -17,4 +17,19 @@ class Movie < ApplicationRecord
     greater_than_or_equal_to: FIRST_FILM_YEAR,
     less_than_or_equal_to: ->(_movie) { Date.current.year }
   }
+
+  def self.add_ratings(totals)
+    return if totals.empty?
+
+    where(id: totals.keys).order(:id).lock("FOR NO KEY UPDATE").ids
+    values = totals.map { |id, (stars, reviews)| sanitize_sql_array([ "(?, ?, ?)", id, stars, reviews ]) }.join(", ")
+
+    connection.exec_update(<<~SQL.squish)
+      UPDATE movies
+      SET ratings_sum = movies.ratings_sum + totals.stars,
+          ratings_count = movies.ratings_count + totals.reviews
+      FROM (VALUES #{values}) AS totals(movie_id, stars, reviews)
+      WHERE movies.id = totals.movie_id
+    SQL
+  end
 end
