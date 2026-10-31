@@ -71,4 +71,13 @@ RSpec.describe Review, type: :model do
       expect(described_class.new(reviewer_name: "  Sam   Pedro ").reviewer_name).to eq("Sam Pedro")
     end
   end
+
+  describe ".newest_first" do
+    it "orders by creation, newest first, breaking ties by id" do
+      older = create(:review, created_at: 2.days.ago)
+      first, second = create_list(:review, 2, created_at: 1.day.ago)
+
+      expect(described_class.newest_first).to eq([ second, first, older ])
+    end
+  end
 end
