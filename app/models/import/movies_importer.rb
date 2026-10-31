@@ -35,7 +35,7 @@ class Import::MoviesImporter
 
   def start_import
     checksum = Digest::SHA256.file(path).hexdigest
-    raise AlreadyImportedError, "#{path} has already been imported" if Import.completed.exists?(file_checksum: checksum)
+    raise AlreadyImportedError, I18n.t("imports.errors.already_imported", path:) if Import.completed.exists?(file_checksum: checksum)
 
     Import.create!(kind: :movies, source_path: path, file_checksum: checksum, status: :running, started_at: Time.current)
   end

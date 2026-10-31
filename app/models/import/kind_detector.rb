@@ -29,7 +29,7 @@ class Import::KindDetector
 
   def read_headers
     first_line = File.open(path, encoding: "bom|utf-8", &:gets)
-    raise UnknownFormatError, "#{path} is empty" if first_line.blank?
+    raise UnknownFormatError, I18n.t("imports.errors.empty_file", path:) if first_line.blank?
 
     CSV.parse_line(first_line).map { |header| header.to_s.squish.downcase }
   end
@@ -37,6 +37,6 @@ class Import::KindDetector
   def unknown_headers_message(headers)
     expected = HEADERS.map { |kind, columns| "#{kind} (#{columns.join(', ')})" }.join("; ")
 
-    "#{path} has unrecognized headers (#{headers.join(', ')}). Expected #{expected}"
+    I18n.t("imports.errors.unknown_format", path:, headers: headers.join(", "), expected:)
   end
 end
