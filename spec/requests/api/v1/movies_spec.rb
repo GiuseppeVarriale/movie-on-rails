@@ -31,7 +31,7 @@ RSpec.describe "API v1 movies", type: :request do
       "actors" => [ { "id" => inception.actors.find_by!(name: "Elliot Page").id, "name" => "Elliot Page" },
                     { "id" => leo.id, "name" => "Leonardo Di Caprio" } ],
       "filming_locations" => [ { "id" => inception.filming_locations.first.id, "name" => "Paris", "country" => "FR" } ],
-      "url" => api_v1_movie_url(inception)
+      "url" => api_v1_movie_url(inception), "reviews_url" => api_v1_movie_reviews_url(inception)
     }
   end
 

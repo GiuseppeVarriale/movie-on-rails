@@ -61,7 +61,18 @@ RSpec.configure do |config|
                   }
                 }
               },
-              url: { type: :string, format: :uri }
+              url: { type: :string, format: :uri },
+              reviews_url: { type: :string, format: :uri }
+            }
+          },
+          review: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              reviewer_name: { type: :string },
+              stars: { type: :integer, minimum: Review::MIN_STARS, maximum: Review::MAX_STARS },
+              body: { type: :string, nullable: true },
+              created_at: { type: :string, format: "date-time" }
             }
           },
           pagination:,
