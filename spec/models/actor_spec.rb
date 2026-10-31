@@ -114,7 +114,7 @@ RSpec.describe Actor, type: :model do
     end
   end
 
-  describe "bulk insert (used by the CSV import)" do
+  describe "bulk insert" do
     it "skips actors that already exist, regardless of case" do
       create(:actor, name: "Leonardo Di Caprio")
 
