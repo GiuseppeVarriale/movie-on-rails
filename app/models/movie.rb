@@ -6,9 +6,9 @@ class Movie < ApplicationRecord
 
   validates :title, presence: true, uniqueness: true
   validates :description, presence: true
-  validates :year, numericality: {
+  validates :year, presence: true, numericality: {
     only_integer: true,
     greater_than_or_equal_to: FIRST_FILM_YEAR,
     less_than_or_equal_to: ->(_movie) { Date.current.year }
-  }, allow_nil: true
+  }
 end
