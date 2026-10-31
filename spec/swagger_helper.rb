@@ -60,7 +60,8 @@ RSpec.configure do |config|
                     country: { type: :string, description: "ISO 3166-1 alpha-2 code" }
                   }
                 }
-              }
+              },
+              url: { type: :string, format: :uri }
             }
           },
           pagination:,
@@ -70,7 +71,7 @@ RSpec.configure do |config|
               error: {
                 type: :object,
                 properties: {
-                  code: { type: :string, enum: %w[invalid_parameter] },
+                  code: { type: :string, enum: %w[not_found invalid_parameter] },
                   message: { type: :string }
                 }
               }
