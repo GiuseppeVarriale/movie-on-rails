@@ -107,8 +107,8 @@ jobs:
       - name: Build CSS
         run: bin/rails tailwindcss:build
 
-      - name: Prepare test database
-        run: bin/rails db:prepare
+      - name: Prepare test database (schema only, no seeds)
+        run: bin/rails db:create db:schema:load
 
       - name: Run specs
         run: bin/rspec
