@@ -160,6 +160,14 @@ RSpec.describe Import::ReviewsImporter do
     let(:small) { csv_file(header + ("Inception,Sam Pedro,4,Good\n" * 5)) }
     let(:large) { csv_file(header + ("Inception,Sam Pedro,4,Good\n" * 50)) }
 
+    it "runs the same number of queries whatever the number of movies in a batch" do
+      titles = Array.new(40) { |index| create(:movie, title: "Film #{index}").title }
+      one_movie = csv_file(header + ("Inception,Sam Pedro,4,Good\n" * 40))
+      many_movies = csv_file(header + titles.map { |title| "#{title},Sam Pedro,4,Good\n" }.join)
+
+      expect(count_queries { described_class.call(many_movies) }).to eq(count_queries { described_class.call(one_movie) })
+    end
+
     it "runs the same number of queries whatever the number of rows in a batch" do
       expect(count_queries { described_class.call(large) }).to eq(count_queries { described_class.call(small) })
     end

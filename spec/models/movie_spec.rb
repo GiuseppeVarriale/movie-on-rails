@@ -94,6 +94,23 @@ RSpec.describe Movie, type: :model do
         .to raise_error(ActiveRecord::StatementInvalid, /movies_ratings_non_negative/)
     end
 
+    describe ".add_ratings" do
+      let!(:other) { create(:movie) }
+
+      it "adds each movie's totals to its counters" do
+        described_class.update_counters(movie.id, ratings_sum: 4, ratings_count: 1)
+
+        described_class.add_ratings(movie.id => [ 7, 2 ], other.id => [ 5, 1 ])
+
+        expect([ movie.reload, other.reload ].map { |m| [ m.ratings_sum, m.ratings_count, m.average_stars ] })
+          .to eq([ [ 11, 3, BigDecimal("3.67") ], [ 5, 1, BigDecimal("5") ] ])
+      end
+
+      it "does nothing without totals" do
+        expect { described_class.add_ratings({}) }.not_to(change { movie.reload.ratings_count })
+      end
+    end
+
     it "sorts by average with the index, best rated first" do
       worse, better, unrated = create_list(:movie, 3)
       described_class.update_counters(worse.id, ratings_sum: 11, ratings_count: 4)
