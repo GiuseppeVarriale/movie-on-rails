@@ -19,7 +19,7 @@ RSpec.configure do |config|
       pages: { type: :integer, example: 3 },
       count: { type: :integer, example: 45 },
       next_page: { type: :integer, nullable: true, example: 2 },
-      prev_page: { type: :integer, nullable: true, example: nil }
+      prev_page: { type: :integer, nullable: true }
     }
   }
 
