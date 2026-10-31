@@ -65,6 +65,13 @@ RSpec.describe Import::KindDetector do
           .to raise_error(described_class::UnknownFormatError, /Expected movies \(.+\); reviews \(movie, user, stars, review\)/)
       end
 
+      it "raises when the header line isn't valid CSV" do
+        path = csv_file("source \"https://rubygems.org\"\n")
+
+        expect { described_class.call(path) }
+          .to raise_error(described_class::UnknownFormatError, /is not a valid CSV file/)
+      end
+
       it "raises when the file is empty" do
         path = csv_file("")
 
