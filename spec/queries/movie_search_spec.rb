@@ -36,6 +36,12 @@ RSpec.describe MovieSearch do
       expect(described_class.new(sort: "newest").results).to eq([ unrated, inception, gone_in_60_seconds ])
     end
 
+    it "breaks ties between movies of the same year by title" do
+      tenet = create(:movie, title: "Tenet", year: 2010)
+
+      expect(described_class.new(sort: "newest").results.where(year: 2010)).to eq([ inception, tenet ])
+    end
+
     it "preloads actors and filming locations" do
       results = described_class.new.results.to_a
 
