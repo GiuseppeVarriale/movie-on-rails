@@ -59,6 +59,16 @@ en:
         title: "No movies yet"
         hint_html: "Import them with %{command}"
         command: 'bin/rails import:csv FILES="movies.csv reviews.csv"'
+    show:
+      back: "← All movies"
+      about: "About"
+      reviews:
+        zero: "Reviews"
+        one: "1 review"
+        other: "%{count} reviews"
+      review_pages: "Review pages"
+      no_text: "No comment"
+      no_reviews: "No reviews yet"
     movie:
       directed_by: "Directed by %{director}"
       reviews_count:
