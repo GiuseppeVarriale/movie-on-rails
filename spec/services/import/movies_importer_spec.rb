@@ -72,6 +72,23 @@ RSpec.describe Import::MoviesImporter do
     end
   end
 
+  describe "a file being imported right now" do
+    before do
+      create(:import, status: :running, file_checksum: Digest::SHA256.file(file_fixture("movies.csv")).hexdigest)
+    end
+
+    it "is refused before writing anything" do
+      expect { described_class.call(file_fixture("movies.csv")) rescue nil }
+        .to not_change(Movie, :count)
+        .and not_change(Import, :count)
+    end
+
+    it "raises AlreadyImportedError" do
+      expect { described_class.call(file_fixture("movies.csv")) }
+        .to raise_error(described_class::AlreadyImportedError, /already been imported or is being imported/)
+    end
+  end
+
   describe "invalid rows" do
     let(:path) do
       csv_file(header +
