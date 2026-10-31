@@ -1,5 +1,4 @@
 class Movie < ApplicationRecord
-  # "Roundhay Garden Scene" (Louis Le Prince, 1888), the oldest surviving film.
   FIRST_FILM_YEAR = 1888
 
   has_many :movie_actors, dependent: :destroy
