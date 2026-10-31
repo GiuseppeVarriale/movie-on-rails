@@ -1,0 +1,12 @@
+<% if @suggestions.any? %>
+  <% @suggestions.each do |suggestion| %>
+    <li role="option" id="<%= dom_id(suggestion.actor, :suggestion) %>"
+        data-autocomplete-value="<%= suggestion.actor.id %>" data-autocomplete-label="<%= suggestion.actor.name %>"
+        class="flex cursor-pointer items-center justify-between gap-4 rounded-sm px-3 py-2 hover:bg-brand-5 aria-selected:bg-brand-5">
+      <span class="font-medium text-brand-90"><%= suggestion.actor.name %></span>
+      <span class="text-xs text-ink-50"><%= t(".movies_count", count: suggestion.movies_count) %></span>
+    </li>
+  <% end %>
+<% elsif @search.searchable? %>
+  <li role="option" aria-disabled="true" class="px-3 py-2 text-sm text-ink-50"><%= t(".none") %></li>
+<% end %>

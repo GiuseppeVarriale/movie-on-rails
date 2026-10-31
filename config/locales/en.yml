@@ -56,6 +56,13 @@ en:
       more:
         one: "+1 more"
         other: "+%{count} more"
+  actors:
+    index:
+      movies_count:
+        zero: "no movies"
+        one: "1 movie"
+        other: "%{count} movies"
+      none: "No actors found"
   shared:
     stars:
       rated: "Rated %{average} out of %{max}"
