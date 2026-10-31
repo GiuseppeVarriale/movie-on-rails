@@ -1,18 +1,6 @@
 require "rails_helper"
 
 RSpec.describe Import::KindDetector do
-  let(:tempfiles) { [] }
-
-  after { tempfiles.each(&:close!) }
-
-  def csv_file(content)
-    file = Tempfile.new([ "import", ".csv" ])
-    file.write(content)
-    file.flush
-    tempfiles << file
-    file.path
-  end
-
   describe ".call" do
     context "with the sample files" do
       it "detects the movies CSV" do
