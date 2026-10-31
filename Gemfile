@@ -55,4 +55,4 @@ group :development do
   gem "web-console"
 end
 
-gem "dotenv", "~> 3.2", groups: [:development, :test]
+gem "dotenv", "~> 3.2", groups: [ :development, :test ]
