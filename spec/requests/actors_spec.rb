@@ -32,6 +32,12 @@ RSpec.describe "Actors", type: :request do
       expect(response.body).not_to include("<li")
     end
 
+    it "drops a list as q" do
+      get actors_path(q: [ "leo" ])
+
+      expect(response.body).not_to include("<li")
+    end
+
     it "escapes actor names" do
       create(:actor, name: "<script>alert(1)</script>")
 
