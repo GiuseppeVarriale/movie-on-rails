@@ -7,6 +7,7 @@ class Api::V1::BaseController < ActionController::API
 
   class InvalidParameter < StandardError; end
 
+  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from InvalidParameter, with: :render_invalid_parameter
 
   private
@@ -18,6 +19,10 @@ class Api::V1::BaseController < ActionController::API
 
   def invalid_parameter!(name, reason, **)
     raise InvalidParameter, t("api.errors.invalid_parameter.#{reason}", parameter: name, **)
+  end
+
+  def render_not_found(error)
+    render_error :not_found, :not_found, t("api.errors.not_found", resource: error.model.constantize.model_name.human)
   end
 
   def render_invalid_parameter(error)
