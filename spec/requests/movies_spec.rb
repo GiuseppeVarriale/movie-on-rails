@@ -8,6 +8,11 @@ RSpec.describe "Movies", type: :request do
     queries
   end
 
+  def add_cast_and_reviews(movie, count)
+    movie.actors << create_list(:actor, count)
+    create_list(:review, count, movie:)
+  end
+
   def create_movie_with_cast
     create(:movie).tap do |movie|
       movie.actors << create_list(:actor, 2)
@@ -126,6 +131,69 @@ RSpec.describe "Movies", type: :request do
       get root_path(actor: "nobody")
 
       expect(response.body).to include("No movies with this actor").and include("Show all movies")
+    end
+  end
+
+  describe "GET /movies/:id" do
+    let(:movie) { create(:movie, title: "Inception", description: "Dream heist.", director: "Christopher Nolan") }
+
+    it "shows the movie's details" do
+      get movie_path(movie)
+
+      expect(response.body).to include("Inception").and include("Dream heist.").and include("Directed by Christopher Nolan")
+    end
+
+    it "uses the movie title as the page title" do
+      get movie_path(movie)
+
+      expect(response.body).to include("<title>Inception · Movies on Rails</title>")
+    end
+
+    it "lists the reviews newest first" do
+      create(:review, movie:, reviewer_name: "Older", created_at: 2.days.ago)
+      create(:review, movie:, reviewer_name: "Newer", created_at: 1.day.ago)
+
+      get movie_path(movie)
+
+      expect(response.body.index("Newer")).to be < response.body.index("Older")
+    end
+
+    it "keeps the review text as given and notes a review without text" do
+      create(:review, movie:, body: "Empty")
+      create(:review, movie:, body: nil)
+
+      get movie_path(movie)
+
+      expect(response.body).to include("Empty").and include("No comment")
+    end
+
+    it "paginates the reviews" do
+      stub_const("MoviesController::REVIEWS_PER_PAGE", 2)
+      create_list(:review, 3, movie:)
+
+      get movie_path(movie, page: 2)
+
+      expect(response.body.scan(/<li id="review_/).size).to eq(1)
+    end
+
+    it "shows an empty state without reviews" do
+      get movie_path(movie)
+
+      expect(response.body).to include("No reviews yet")
+    end
+
+    it "runs the same number of queries whatever the number of reviews and cast" do
+      add_cast_and_reviews(movie, 1)
+      few = count_queries { get movie_path(movie) }
+      add_cast_and_reviews(movie, 4)
+
+      expect(count_queries { get movie_path(movie) }).to eq(few)
+    end
+
+    it "returns 404 for an unknown movie" do
+      get movie_path(id: 0)
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 
