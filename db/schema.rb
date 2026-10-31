@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_125840) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_132433) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -20,6 +20,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_125840) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_actors_on_name", unique: true
+  end
+
+  create_table "filming_locations", force: :cascade do |t|
+    t.citext "name", null: false
+    t.string "country", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name", "country"], name: "index_filming_locations_on_name_and_country", unique: true
   end
 
   create_table "movie_actors", force: :cascade do |t|
