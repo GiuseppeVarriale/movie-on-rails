@@ -39,6 +39,12 @@ gem "sidekiq", "~> 8.1"
 # Pagination
 gem "pagy", "~> 43.8"
 
+# Serves the OpenAPI file generated from the API specs and a Swagger UI at /api-docs
+gem "rswag-api", "~> 2.17"
+gem "rswag-ui", "~> 2.17"
+# Required by rswag-ui but no longer a default gem since Ruby 4.0
+gem "ostruct", "~> 0.6"
+
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 
@@ -67,6 +73,8 @@ group :development, :test do
   gem "factory_bot_rails", "~> 6.5"
   # Realistic fake data for factories
   gem "faker", "~> 3.8"
+  # API request specs that also generate the OpenAPI (Swagger) docs
+  gem "rswag-specs", "~> 2.17"
 end
 
 group :development do
