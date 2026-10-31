@@ -48,11 +48,20 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Test framework; in development too so generators create specs and factories
+  gem "rspec-rails", "~> 8.0"
+  gem "factory_bot_rails", "~> 6.5"
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+end
+
+group :test do
+  # One-liner matchers for associations, validations and DB columns/indexes
+  gem "shoulda-matchers", "~> 8.0"
 end
 
 gem "dotenv", "~> 3.2", groups: [ :development, :test ]

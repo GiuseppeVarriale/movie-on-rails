@@ -34,6 +34,9 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# RSpec example status persistence (--only-failures / --next-failure).
+/spec/examples.txt
+
 # Local database config (template: config/database.example.yml).
 /config/database.yml
 
