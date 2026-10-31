@@ -132,6 +132,30 @@ RSpec.describe Actor, type: :model do
     end
   end
 
+  describe "search scopes" do
+    before { [ "Leonardo Di Caprio", "Cleo Laine", "Ellen Page" ].each { |name| create(:actor, name:) } }
+
+    describe ".name_contains" do
+      it "keeps actors whose name contains the term, ignoring case" do
+        expect(described_class.name_contains("LEO").pluck(:name)).to contain_exactly("Leonardo Di Caprio", "Cleo Laine")
+      end
+
+      it "treats % and _ literally" do
+        expect(described_class.name_contains("%").count).to eq(0)
+      end
+    end
+
+    describe ".order_by_prefix_match" do
+      it "puts names starting with the term first" do
+        expect(described_class.order_by_prefix_match("leo").order(:name).first.name).to eq("Leonardo Di Caprio")
+      end
+
+      it "only orders, without removing anyone" do
+        expect(described_class.order_by_prefix_match("leo").count).to eq(3)
+      end
+    end
+  end
+
   describe "normalization" do
     it "squishes the name" do
       expect(described_class.new(name: "  Leonardo   Di Caprio ").name).to eq("Leonardo Di Caprio")
