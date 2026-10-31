@@ -24,6 +24,11 @@ RSpec.describe "API v1 movies", type: :request do
     response.parsed_body["movies"].pluck("title")
   end
 
+  def titles_for(params)
+    get api_v1_movies_path(params)
+    titles
+  end
+
   def inception_json
     {
       "id" => inception.id, "title" => "Inception", "year" => 2010, "director" => "Christopher Nolan",
@@ -166,6 +171,70 @@ RSpec.describe "API v1 movies", type: :request do
       get api_v1_movies_path(actor_id: create(:actor).id)
 
       expect([ response.status, titles ]).to eq([ 200, [] ])
+    end
+
+    it "filters by the actor_id alone" do
+      get api_v1_movies_path(actor_id: inception.actors.find_by!(name: "Elliot Page").id)
+
+      expect(titles).to eq([ "Inception" ])
+    end
+
+    it "matches the text anywhere in an actor's name" do
+      zodiac.actors << create(:actor, name: "Cleo Smith")
+
+      get api_v1_movies_path(actor: "leo")
+
+      expect(titles).to eq([ "Inception", "Gone in 60 seconds", "Zodiac" ])
+    end
+
+    it "lists a movie once when several of its actors match" do
+      inception.actors << create(:actor, name: "Leonard Nimoy")
+
+      get api_v1_movies_path(actor: "leo")
+
+      expect([ titles, response.parsed_body.dig("meta", "pagination", "count") ]).to eq([ [ "Inception", "Gone in 60 seconds" ], 2 ])
+    end
+
+    it "returns an empty list when no actor matches the text" do
+      get api_v1_movies_path(actor: "xyz")
+
+      expect([ response.status, titles ]).to eq([ 200, [] ])
+    end
+
+    it "returns an empty list for an unknown actor_id" do
+      get api_v1_movies_path(actor_id: Actor.maximum(:id).to_i + 1)
+
+      expect([ response.status, titles ]).to eq([ 200, [] ])
+    end
+
+    it "takes % and _ in the text literally" do
+      zodiac.actors << create(:actor, name: "Mark_Ruffalo 100%")
+
+      matches = %w[k_r a_k %%%].map { |text| titles_for(actor: text) }
+
+      expect(matches).to eq([ [ "Zodiac" ], [], [] ])
+    end
+
+    it "combines the actor filter with each sort" do
+      orders = MovieSearch::SORTS.keys.index_with { |sort| titles_for(actor: "leo", sort:) }
+
+      expect(orders).to eq("rating" => [ "Inception", "Gone in 60 seconds" ], "title" => [ "Gone in 60 seconds", "Inception" ],
+                           "newest" => [ "Inception", "Gone in 60 seconds" ])
+    end
+
+    it "breaks ties in the newest sort by title" do
+      create(:movie, title: "Alien", year: 2010)
+
+      get api_v1_movies_path(sort: "newest")
+
+      expect(titles).to eq([ "Alien", "Inception", "Zodiac", "Gone in 60 seconds" ])
+    end
+
+    it "paginates the filtered movies" do
+      get api_v1_movies_path(actor: "leo", sort: "title", per_page: 1, page: 2)
+
+      expect([ titles, response.parsed_body.dig("meta", "pagination").slice("count", "pages") ])
+        .to eq([ [ "Inception" ], { "count" => 2, "pages" => 2 } ])
     end
 
     it "lists the same movies in the same order as the movies page" do

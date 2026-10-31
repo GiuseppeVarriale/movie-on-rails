@@ -52,6 +52,28 @@ RSpec.describe "API v1 actors", type: :request do
       ])
     end
 
+    it "lists names starting with q first, then by name" do
+      create(:actor, name: "Leopold Stokowski")
+
+      get api_v1_actors_path(q: "leo")
+
+      expect(names).to eq([ "Leonardo Di Caprio", "Leopold Stokowski", "Cleo Smith" ])
+    end
+
+    it "returns at most #{ActorSearch::LIMIT} actors" do
+      create_list(:actor, ActorSearch::LIMIT) { |actor, i| actor.update!(name: "Leon #{i}") }
+
+      get api_v1_actors_path(q: "leo")
+
+      expect(names.size).to eq(ActorSearch::LIMIT)
+    end
+
+    it "takes % and _ in q literally" do
+      get api_v1_actors_path(q: "%%%")
+
+      expect(names).to eq([])
+    end
+
     it "returns an empty list when nothing matches" do
       get api_v1_actors_path(q: "xyz")
 
