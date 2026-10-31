@@ -10,7 +10,7 @@ RSpec.describe Movie, type: :model do
   describe "database" do
     it { is_expected.to have_db_column(:title).of_type(:string).with_options(null: false) }
     it { is_expected.to have_db_column(:description).of_type(:text).with_options(null: false) }
-    it { is_expected.to have_db_column(:year).of_type(:integer) }
+    it { is_expected.to have_db_column(:year).of_type(:integer).with_options(null: false) }
     it { is_expected.to have_db_column(:director).of_type(:string) }
     it { is_expected.to have_db_index(:title).unique }
 
@@ -22,6 +22,12 @@ RSpec.describe Movie, type: :model do
 
     it "rejects a NULL description even when validations are skipped" do
       movie.description = nil
+
+      expect { movie.save(validate: false) }.to raise_error(ActiveRecord::NotNullViolation)
+    end
+
+    it "rejects a NULL year even when validations are skipped" do
+      movie.year = nil
 
       expect { movie.save(validate: false) }.to raise_error(ActiveRecord::NotNullViolation)
     end
@@ -38,13 +44,13 @@ RSpec.describe Movie, type: :model do
     it { is_expected.to validate_presence_of(:title) }
     it { is_expected.to validate_uniqueness_of(:title) }
     it { is_expected.to validate_presence_of(:description) }
+    it { is_expected.to validate_presence_of(:year) }
 
     it do
       expect(movie).to validate_numericality_of(:year)
         .only_integer
         .is_greater_than_or_equal_to(Movie::FIRST_FILM_YEAR)
         .is_less_than_or_equal_to(Date.current.year)
-        .allow_nil
     end
 
     describe "year range" do
