@@ -120,6 +120,42 @@ RSpec.describe Import::ReviewsImporter do
     end
   end
 
+  describe "movie ratings" do
+    it "adds the imported reviews to each movie's ratings" do
+      described_class.call(file_fixture("reviews.csv"))
+
+      expect([ gone_in_60_seconds.reload, inception.reload ].map { |movie| [ movie.ratings_sum, movie.ratings_count ] })
+        .to eq([ [ 18, 5 ], [ 11, 4 ] ])
+    end
+
+    it "gives the sample movies their averages" do
+      described_class.call(file_fixture("reviews.csv"))
+
+      expect([ gone_in_60_seconds.reload.average_stars, inception.reload.average_stars ])
+        .to eq([ BigDecimal("3.6"), BigDecimal("2.75") ])
+    end
+
+    it "gives the same averages in tiny batches" do
+      described_class.call(file_fixture("reviews.csv"), batch_size: 2)
+
+      expect(inception.reload.average_stars).to eq(BigDecimal("2.75"))
+    end
+
+    it "adds to ratings the movie already had" do
+      Movie.update_counters(inception.id, ratings_sum: 5, ratings_count: 1)
+
+      described_class.call(csv_file(header + "Inception,Sam Pedro,1,Bad\n"))
+
+      expect(inception.reload).to have_attributes(ratings_sum: 6, ratings_count: 2, average_stars: BigDecimal("3"))
+    end
+
+    it "ignores rows that failed" do
+      described_class.call(csv_file(header + "Inception,Sam Pedro,4,Good\nInception,Bad,9,Nope\n"))
+
+      expect(inception.reload).to have_attributes(ratings_sum: 4, ratings_count: 1)
+    end
+  end
+
   describe "performance" do
     let(:small) { csv_file(header + ("Inception,Sam Pedro,4,Good\n" * 5)) }
     let(:large) { csv_file(header + ("Inception,Sam Pedro,4,Good\n" * 50)) }
