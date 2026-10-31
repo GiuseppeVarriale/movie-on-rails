@@ -22,14 +22,16 @@ class Movie < ApplicationRecord
     return if totals.empty?
 
     where(id: totals.keys).order(:id).lock("FOR NO KEY UPDATE").ids
-    values = totals.map { |id, (stars, reviews)| sanitize_sql_array([ "(?, ?, ?)", id, stars, reviews ]) }.join(", ")
-
-    connection.exec_update(<<~SQL.squish)
-      UPDATE movies
-      SET ratings_sum = movies.ratings_sum + totals.stars,
-          ratings_count = movies.ratings_count + totals.reviews
-      FROM (VALUES #{values}) AS totals(movie_id, stars, reviews)
-      WHERE movies.id = totals.movie_id
-    SQL
+    where(id: totals.keys).update_all(
+      ratings_sum: arel_table[:ratings_sum] + per_movie(totals) { |stars, _reviews| stars },
+      ratings_count: arel_table[:ratings_count] + per_movie(totals) { |_stars, reviews| reviews }
+    )
   end
+
+  def self.per_movie(totals)
+    totals.each_with_object(Arel::Nodes::Case.new(arel_table[:id])) do |(id, values), expression|
+      expression.when(id).then(yield(*values))
+    end
+  end
+  private_class_method :per_movie
 end
