@@ -1,0 +1,328 @@
+---
+openapi: 3.0.1
+info:
+  title: Movies on Rails API
+  version: v1
+  description: Read-only JSON API with the same movies, sorting and actor filter as
+    the web pages. Lists are paginated with `page` and `per_page` (default 20, at
+    most 100).
+servers:
+- url: "/"
+paths:
+  "/api/v1/actors":
+    get:
+      summary: Search actors
+      tags:
+      - Actors
+      description: Actors whose name contains `q` (any case), names starting with
+        it first, at most 10. Use an actor's id to filter /api/v1/movies.
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 3
+      responses:
+        '200':
+          description: Actors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actors:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/actor"
+                  meta:
+                    type: object
+                    properties:
+                      q:
+                        type: string
+                      limit:
+                        type: integer
+        '400':
+          description: Missing or too short q
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/movies":
+    get:
+      summary: List movies
+      tags:
+      - Movies
+      description: Same list, sorting and actor filter as the movies page.
+      parameters:
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - rating
+          - title
+          - newest
+          default: rating
+        description: 'rating: best rated first (unrated last); title: A–Z; newest:
+          by year, newest first'
+      - name: actor_id
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+        description: Only movies with this actor (see /api/v1/actors). Takes precedence
+          over actor
+      - name: actor
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 3
+        description: Only movies with an actor whose name contains this text
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      responses:
+        '200':
+          description: Movies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  movies:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/movie"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        "$ref": "#/components/schemas/pagination"
+                      filters:
+                        type: object
+                        description: The filters actually applied
+                        properties:
+                          sort:
+                            type: string
+                          actor_id:
+                            type: integer
+                            nullable: true
+                          actor:
+                            type: string
+                            nullable: true
+        '400':
+          description: Invalid parameter
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/movies/{id}":
+    parameters:
+    - name: id
+      in: path
+      schema:
+        type: integer
+      required: true
+    get:
+      summary: Show a movie
+      tags:
+      - Movies
+      responses:
+        '200':
+          description: Movie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  movie:
+                    "$ref": "#/components/schemas/movie"
+        '404':
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/movies/{movie_id}/reviews":
+    parameters:
+    - name: movie_id
+      in: path
+      schema:
+        type: integer
+      required: true
+    get:
+      summary: List a movie's reviews
+      tags:
+      - Reviews
+      description: Newest first.
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      responses:
+        '200':
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/review"
+                  meta:
+                    type: object
+                    properties:
+                      movie_id:
+                        type: integer
+                      pagination:
+                        "$ref": "#/components/schemas/pagination"
+        '404':
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+components:
+  schemas:
+    movie:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        year:
+          type: integer
+        director:
+          type: string
+        description:
+          type: string
+        average_stars:
+          type: number
+          nullable: true
+          description: Average of the reviews' stars (0–5), null without reviews
+        reviews_count:
+          type: integer
+        actors:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+        filming_locations:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              country:
+                type: string
+                description: ISO 3166-1 alpha-2 code
+        url:
+          type: string
+          format: uri
+        reviews_url:
+          type: string
+          format: uri
+    review:
+      type: object
+      properties:
+        id:
+          type: integer
+        reviewer_name:
+          type: string
+        stars:
+          type: integer
+          minimum: 0
+          maximum: 5
+        body:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    actor:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        movies_count:
+          type: integer
+        movies_url:
+          type: string
+          format: uri
+          description: The actor's movies
+    pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 20
+        pages:
+          type: integer
+          example: 3
+        count:
+          type: integer
+          example: 45
+        next_page:
+          type: integer
+          nullable: true
+          example: 2
+        prev_page:
+          type: integer
+          nullable: true
+          example: 
+    error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+              - not_found
+              - invalid_parameter
+            message:
+              type: string
