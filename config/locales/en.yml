@@ -29,3 +29,7 @@ en:
     nav:
       movies: "Movies"
     footer: "Movies on Rails · a movie review platform built with Ruby on Rails"
+  movies:
+    index:
+      eyebrow: "Catalogue"
+      title: "Movies"
