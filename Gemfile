@@ -48,6 +48,10 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+  # Linting for specs, factories and Capybara matchers
+  gem "rubocop-rspec", require: false
+  gem "rubocop-factory_bot", require: false
+  gem "rubocop-capybara", require: false
 
   # Test framework; in development too so generators create specs and factories
   gem "rspec-rails", "~> 8.0"
