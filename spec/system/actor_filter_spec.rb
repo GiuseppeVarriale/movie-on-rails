@@ -74,4 +74,25 @@ RSpec.describe "Actor filter", type: :system do
 
     expect(page).to have_text("1 movie with Ellen Page")
   end
+
+  describe "several actors matching the same letters" do
+    before do
+      Movie.find_by!(title: "Inception").actors << [ create(:actor, name: "Someleo Name"), create(:actor, name: "Aleo Smith") ]
+      visit root_path
+    end
+
+    it "suggests the actor starting with the letters first" do
+      fill_in "Filter by actor", with: "leo"
+
+      expect(page.all("li[role='option']", minimum: 3).map { |option| option.text.lines.first.strip })
+        .to eq([ "Leonardo Di Caprio", "Aleo Smith", "Someleo Name" ])
+    end
+
+    it "lists only the picked actor's movies" do
+      fill_in "Filter by actor", with: "leo"
+      find("li[role='option']", text: "Someleo Name").click
+
+      expect(page).to have_text("1 movie with Someleo Name")
+    end
+  end
 end

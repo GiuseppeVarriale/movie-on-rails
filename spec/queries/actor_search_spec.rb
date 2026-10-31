@@ -60,4 +60,20 @@ RSpec.describe ActorSearch do
       expect(described_class.new(query: "ellen").results.sole.movies_count).to eq(0)
     end
   end
+
+  describe "a name that starts with the term and others that only contain it" do
+    before do
+      create(:actor, name: "Someleo Name")
+      create(:actor, name: "Leonardo de Caprio")
+      create(:actor, name: "Aleo Smith")
+    end
+
+    it "suggests all of them" do
+      expect(names("leo")).to contain_exactly("Leonardo de Caprio", "Someleo Name", "Aleo Smith")
+    end
+
+    it "suggests the one starting with the term first, even before names that sort earlier" do
+      expect(names("LEO")).to eq([ "Leonardo de Caprio", "Aleo Smith", "Someleo Name" ])
+    end
+  end
 end

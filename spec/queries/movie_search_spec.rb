@@ -96,4 +96,22 @@ RSpec.describe MovieSearch do
       expect(described_class.new(sort: "title", actor_id: leo.id).params).to eq(sort: "title", actor_id: leo.id)
     end
   end
+
+  describe "partial actor filter matching anywhere in the name" do
+    let!(:leonardo) { create(:actor, name: "Leonardo de Caprio") }
+    let!(:someleo) { create(:actor, name: "Someleo Name") }
+
+    before do
+      inception.actors << leonardo
+      unrated.actors << someleo
+    end
+
+    it "lists the movies of every actor whose name contains the text" do
+      expect(described_class.new(actor: "leo").results).to contain_exactly(inception, unrated)
+    end
+
+    it "lists only the picked actor's movies when filtering by id" do
+      expect(described_class.new(actor_id: someleo.id).results).to eq([ unrated ])
+    end
+  end
 end
