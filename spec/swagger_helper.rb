@@ -39,49 +39,54 @@ RSpec.configure do |config|
           movie: {
             type: :object,
             properties: {
-              id: { type: :integer },
-              title: { type: :string },
-              year: { type: :integer },
-              director: { type: :string },
-              description: { type: :string },
-              average_stars: { type: :number, nullable: true, description: "Average of the reviews' stars (0–5), null without reviews" },
-              reviews_count: { type: :integer },
+              id: { type: :integer, example: 1 },
+              title: { type: :string, example: "Gone in 60 seconds" },
+              year: { type: :integer, example: 2000 },
+              director: { type: :string, example: "Dominic Sena" },
+              description: { type: :string, example: "A retired master car thief must come back to the industry..." },
+              average_stars: { type: :number, nullable: true, example: 3.6,
+                               description: "Average of the reviews' stars (0–5), null without reviews" },
+              reviews_count: { type: :integer, example: 5 },
               actors: {
                 type: :array,
-                items: { type: :object, properties: { id: { type: :integer }, name: { type: :string } } }
+                items: {
+                  type: :object,
+                  properties: { id: { type: :integer, example: 2 }, name: { type: :string, example: "Leonardo Di Caprio" } }
+                }
               },
               filming_locations: {
                 type: :array,
                 items: {
                   type: :object,
                   properties: {
-                    id: { type: :integer },
-                    name: { type: :string },
-                    country: { type: :string, description: "ISO 3166-1 alpha-2 code" }
+                    id: { type: :integer, example: 1 },
+                    name: { type: :string, example: "Los Angeles" },
+                    country: { type: :string, example: "US", description: "ISO 3166-1 alpha-2 code" }
                   }
                 }
               },
-              url: { type: :string, format: :uri },
-              reviews_url: { type: :string, format: :uri }
+              url: { type: :string, format: :uri, example: "http://localhost:3000/api/v1/movies/1" },
+              reviews_url: { type: :string, format: :uri, example: "http://localhost:3000/api/v1/movies/1/reviews" }
             }
           },
           review: {
             type: :object,
             properties: {
-              id: { type: :integer },
-              reviewer_name: { type: :string },
-              stars: { type: :integer, minimum: Review::MIN_STARS, maximum: Review::MAX_STARS },
-              body: { type: :string, nullable: true },
-              created_at: { type: :string, format: "date-time" }
+              id: { type: :integer, example: 5 },
+              reviewer_name: { type: :string, example: "Axel Ontheway" },
+              stars: { type: :integer, minimum: Review::MIN_STARS, maximum: Review::MAX_STARS, example: 5 },
+              body: { type: :string, nullable: true, example: "Really really good" },
+              created_at: { type: :string, format: "date-time", example: "2026-10-31T15:50:18.834Z" }
             }
           },
           actor: {
             type: :object,
             properties: {
-              id: { type: :integer },
-              name: { type: :string },
-              movies_count: { type: :integer },
-              movies_url: { type: :string, format: :uri, description: "The actor's movies" }
+              id: { type: :integer, example: 2 },
+              name: { type: :string, example: "Leonardo Di Caprio" },
+              movies_count: { type: :integer, example: 2 },
+              movies_url: { type: :string, format: :uri, example: "http://localhost:3000/api/v1/movies?actor_id=2",
+                            description: "The actor's movies" }
             }
           },
           pagination:,

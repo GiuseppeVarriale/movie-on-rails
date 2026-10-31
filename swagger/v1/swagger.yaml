@@ -40,12 +40,20 @@ paths:
                     properties:
                       q:
                         type: string
+                        example: leo
                       limit:
                         type: integer
+                        example: 10
         '400':
           description: Missing or too short q
           content:
             application/json:
+              examples:
+                short_q:
+                  value:
+                    error:
+                      code: invalid_parameter
+                      message: q must have at least 3 characters
               schema:
                 "$ref": "#/components/schemas/error"
   "/api/v1/movies":
@@ -120,16 +128,35 @@ paths:
                         properties:
                           sort:
                             type: string
+                            example: rating
                           actor_id:
                             type: integer
                             nullable: true
+                            example: 
                           actor:
                             type: string
                             nullable: true
+                            example: leo
         '400':
           description: Invalid parameter
           content:
             application/json:
+              examples:
+                unknown_sort:
+                  value:
+                    error:
+                      code: invalid_parameter
+                      message: 'sort must be one of: rating, title, newest'
+                invalid_actor_id:
+                  value:
+                    error:
+                      code: invalid_parameter
+                      message: actor_id must be a positive integer
+                short_actor:
+                  value:
+                    error:
+                      code: invalid_parameter
+                      message: actor must have at least 3 characters
               schema:
                 "$ref": "#/components/schemas/error"
   "/api/v1/movies/{id}":
@@ -157,6 +184,12 @@ paths:
           description: Movie not found
           content:
             application/json:
+              examples:
+                movie_not_found:
+                  value:
+                    error:
+                      code: not_found
+                      message: Movie not found
               schema:
                 "$ref": "#/components/schemas/error"
   "/api/v1/movies/{movie_id}/reviews":
@@ -204,12 +237,19 @@ paths:
                     properties:
                       movie_id:
                         type: integer
+                        example: 1
                       pagination:
                         "$ref": "#/components/schemas/pagination"
         '404':
           description: Movie not found
           content:
             application/json:
+              examples:
+                movie_not_found:
+                  value:
+                    error:
+                      code: not_found
+                      message: Movie not found
               schema:
                 "$ref": "#/components/schemas/error"
 components:
@@ -219,20 +259,27 @@ components:
       properties:
         id:
           type: integer
+          example: 1
         title:
           type: string
+          example: Gone in 60 seconds
         year:
           type: integer
+          example: 2000
         director:
           type: string
+          example: Dominic Sena
         description:
           type: string
+          example: A retired master car thief must come back to the industry...
         average_stars:
           type: number
           nullable: true
+          example: 3.6
           description: Average of the reviews' stars (0–5), null without reviews
         reviews_count:
           type: integer
+          example: 5
         actors:
           type: array
           items:
@@ -240,8 +287,10 @@ components:
             properties:
               id:
                 type: integer
+                example: 2
               name:
                 type: string
+                example: Leonardo Di Caprio
         filming_locations:
           type: array
           items:
@@ -249,46 +298,60 @@ components:
             properties:
               id:
                 type: integer
+                example: 1
               name:
                 type: string
+                example: Los Angeles
               country:
                 type: string
+                example: US
                 description: ISO 3166-1 alpha-2 code
         url:
           type: string
           format: uri
+          example: http://localhost:3000/api/v1/movies/1
         reviews_url:
           type: string
           format: uri
+          example: http://localhost:3000/api/v1/movies/1/reviews
     review:
       type: object
       properties:
         id:
           type: integer
+          example: 5
         reviewer_name:
           type: string
+          example: Axel Ontheway
         stars:
           type: integer
           minimum: 0
           maximum: 5
+          example: 5
         body:
           type: string
           nullable: true
+          example: Really really good
         created_at:
           type: string
           format: date-time
+          example: '2026-10-31T15:50:18.834Z'
     actor:
       type: object
       properties:
         id:
           type: integer
+          example: 2
         name:
           type: string
+          example: Leonardo Di Caprio
         movies_count:
           type: integer
+          example: 2
         movies_url:
           type: string
           format: uri
+          example: http://localhost:3000/api/v1/movies?actor_id=2
           description: The actor's movies
     pagination:
       type: object
