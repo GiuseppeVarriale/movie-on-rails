@@ -15,3 +15,8 @@ AllCops:
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false
+
+# rswag specs pass every documented parameter (sort, actor_id, id…) through `let`
+RSpec/MultipleMemoizedHelpers:
+  Exclude:
+    - spec/requests/api/**/*

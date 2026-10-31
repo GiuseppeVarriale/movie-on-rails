@@ -1,13 +1,6 @@
 require "rails_helper"
 
 RSpec.describe "Movies", type: :request do
-  def count_queries(&)
-    queries = 0
-    counter = ->(*, payload) { queries += 1 unless payload[:name].in?(%w[SCHEMA TRANSACTION]) }
-    ActiveSupport::Notifications.subscribed(counter, "sql.active_record", &)
-    queries
-  end
-
   def add_cast_and_reviews(movie, count)
     movie.actors << create_list(:actor, count)
     create_list(:review, count, movie:)
