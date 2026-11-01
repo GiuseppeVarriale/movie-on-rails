@@ -138,7 +138,7 @@ RSpec.describe Movie, type: :model do
       described_class.update_counters(worse.id, ratings_sum: 11, ratings_count: 4)
       described_class.update_counters(better.id, ratings_sum: 18, ratings_count: 5)
 
-      expect(described_class.order(Arel.sql("average_stars DESC NULLS LAST"), id: :desc)).to eq([ better, worse, unrated ])
+      expect(described_class.order(described_class.arel_table[:average_stars].desc.nulls_last, id: :desc)).to eq([ better, worse, unrated ])
     end
   end
 
