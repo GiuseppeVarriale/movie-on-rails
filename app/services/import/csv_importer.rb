@@ -67,7 +67,7 @@ class Import::CsvImporter
   end
 
   def each_batch(&)
-    CSV.foreach(path, headers: true, encoding: "bom|utf-8", header_converters: ->(header) { header.to_s.squish.downcase })
+    CSV.foreach(path, headers: true, encoding: "bom|utf-8", header_converters: Import::KindDetector::NORMALIZE_HEADER)
        .with_index(2)
        .each_slice(batch_size, &)
   end
