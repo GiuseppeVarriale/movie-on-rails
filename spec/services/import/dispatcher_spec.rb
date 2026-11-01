@@ -65,8 +65,15 @@ RSpec.describe Import::Dispatcher do
   end
 
   describe ".check!" do
-    it "accepts files it can import" do
-      expect(described_class.check!([ movies_csv, reviews_csv ])).to be(true)
+    it "returns each file with its kind, movies before reviews" do
+      expect(described_class.check!([ reviews_csv, movies_csv ])).to eq([ [ movies_csv, "movies" ], [ reviews_csv, "reviews" ] ])
+    end
+
+    it "keeps the given order between files of the same kind" do
+      more_movies = csv_file(File.read(movies_csv))
+
+      expect(described_class.check!([ reviews_csv, more_movies, movies_csv ]).map(&:first))
+        .to eq([ more_movies, movies_csv, reviews_csv ])
     end
 
     it "raises for a missing file" do
@@ -83,9 +90,13 @@ RSpec.describe Import::Dispatcher do
     end
   end
 
-  describe "IMPORTERS" do
+  describe "IMPORTERS_IN_ORDER" do
     it "has an importer for every Import kind" do
-      expect(described_class::IMPORTERS.keys).to match_array(Import.kinds.keys)
+      expect(described_class::IMPORTERS_IN_ORDER.keys).to match_array(Import.kinds.keys)
+    end
+
+    it "imports movies first, since reviews look up their movie by title" do
+      expect(described_class::IMPORTERS_IN_ORDER.keys).to eq(%w[movies reviews])
     end
   end
 end
