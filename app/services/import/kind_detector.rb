@@ -8,6 +8,8 @@ class Import::KindDetector
     "reviews" => [ "movie", "user", "stars", "review" ]
   }.freeze
 
+  NORMALIZE_HEADER = ->(header) { header.to_s.squish.downcase }
+
   def self.call(path)
     new(path).call
   end
@@ -31,7 +33,7 @@ class Import::KindDetector
     first_line = File.open(path, encoding: "bom|utf-8", &:gets)
     raise UnknownFormatError, I18n.t("imports.errors.empty_file", path:, expected: accepted_formats) if first_line.blank?
 
-    CSV.parse_line(first_line).map { |header| header.to_s.squish.downcase }
+    CSV.parse_line(first_line).map(&NORMALIZE_HEADER)
   rescue CSV::MalformedCSVError
     raise UnknownFormatError, I18n.t("imports.errors.not_csv", path:, expected: accepted_formats)
   end
