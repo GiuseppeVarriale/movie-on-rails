@@ -6,17 +6,21 @@ class Import::ReviewsImporter < Import::CsvImporter
   end
 
   def prepare_batch(csv_rows)
-    titles = csv_rows.map { |csv_row| csv_row["movie"].to_s.squish }.uniq
+    titles = csv_rows.map { |csv_row| title_of(csv_row) }.uniq
     @movies = Movie.where(title: titles).index_by(&:title)
   end
 
   def build_row(csv_row)
-    title = csv_row["movie"].to_s.squish
+    title = title_of(csv_row)
     movie = @movies[title]
     review = Review.new(movie:, reviewer_name: csv_row["user"], stars: csv_row["stars"], body: csv_row["review"])
     return [ review, [ I18n.t("imports.errors.movie_not_found", title:) ] ] unless movie
 
     [ review, validation_errors(review) ]
+  end
+
+  def title_of(csv_row)
+    csv_row["movie"].to_s.squish
   end
 
   def save(reviews)
