@@ -115,11 +115,14 @@ RSpec.describe Movie, type: :model do
 
     describe ".add_ratings" do
       let!(:other) { create(:movie) }
+      let(:totals) do
+        { movie.id => Movie::RatingTotals.new(stars: 7, count: 2), other.id => Movie::RatingTotals.new(stars: 5, count: 1) }
+      end
 
       it "adds each movie's totals to its counters" do
         described_class.update_counters(movie.id, ratings_sum: 4, ratings_count: 1)
 
-        described_class.add_ratings(movie.id => [ 7, 2 ], other.id => [ 5, 1 ])
+        described_class.add_ratings(totals)
 
         expect([ movie.reload, other.reload ].map { |m| [ m.ratings_sum, m.ratings_count, m.average_stars ] })
           .to eq([ [ 11, 3, BigDecimal("3.67") ], [ 5, 1, BigDecimal("5") ] ])

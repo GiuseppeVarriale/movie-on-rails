@@ -16,7 +16,10 @@ RSpec.describe "API v1 movies", type: :request do
   let(:zodiac) { create(:movie, title: "Zodiac", year: 2007, director: "David Fincher") }
 
   before do
-    Movie.add_ratings(inception.id => [ 9, 2 ], gone.id => [ 7, 2 ])
+    Movie.add_ratings(
+      inception.id => Movie::RatingTotals.new(stars: 9, count: 2),
+      gone.id => Movie::RatingTotals.new(stars: 7, count: 2)
+    )
     zodiac
   end
 

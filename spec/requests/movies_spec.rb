@@ -39,8 +39,8 @@ RSpec.describe "Movies", type: :request do
     end
 
     it "lists the movies, best rated first" do
-      inception, gone = create(:movie, title: "Inception"), create(:movie, title: "Gone in 60 seconds")
-      Movie.add_ratings(inception.id => [ 11, 4 ], gone.id => [ 18, 5 ])
+      create(:movie, title: "Inception", ratings_sum: 11, ratings_count: 4)
+      create(:movie, title: "Gone in 60 seconds", ratings_sum: 18, ratings_count: 5)
 
       get root_path
 
