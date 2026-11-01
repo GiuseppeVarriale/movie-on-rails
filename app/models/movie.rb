@@ -1,7 +1,7 @@
 class Movie < ApplicationRecord
   FIRST_FILM_YEAR = 1888
 
-  RatingTotals = Data.define(:stars, :count)
+  RatingTotal = Data.define(:stars, :count)
 
   has_many :movie_actors, dependent: :destroy
   has_many :actors, through: :movie_actors
