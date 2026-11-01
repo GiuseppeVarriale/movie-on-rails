@@ -11,7 +11,7 @@ class MovieSearch
   def initialize(sort: nil, actor_id: nil, actor: nil)
     @sort = SORTS.key?(sort) ? sort : DEFAULT_SORT
     @actor_id = Integer(actor_id, exception: false)
-    @actor = ActorSearch.new(query: actor).then { |search| search.query if search.searchable? } unless @actor_id
+    @actor = searchable_actor_text(actor) unless @actor_id
   end
 
   def results
@@ -34,6 +34,11 @@ class MovieSearch
   end
 
   private
+
+  def searchable_actor_text(text)
+    search = ActorSearch.new(query: text)
+    search.query if search.searchable?
+  end
 
   def actor_movie_ids
     movie_actors = actor_id ? MovieActor.where(actor_id:) : MovieActor.where(actor: Actor.name_contains(actor))
