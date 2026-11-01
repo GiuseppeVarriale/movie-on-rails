@@ -25,6 +25,9 @@ class Import::ReviewsImporter < Import::CsvImporter
   end
 
   def add_to_movie_ratings(reviews)
-    Movie.add_ratings(reviews.group_by(&:movie_id).transform_values { |movie_reviews| [ movie_reviews.sum(&:stars), movie_reviews.size ] })
+    totals = reviews.group_by(&:movie_id).transform_values do |movie_reviews|
+      Movie::RatingTotals.new(stars: movie_reviews.sum(&:stars), count: movie_reviews.size)
+    end
+    Movie.add_ratings(totals)
   end
 end

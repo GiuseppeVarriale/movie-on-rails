@@ -1,6 +1,8 @@
 class Movie < ApplicationRecord
   FIRST_FILM_YEAR = 1888
 
+  RatingTotals = Data.define(:stars, :count)
+
   has_many :movie_actors, dependent: :destroy
   has_many :actors, through: :movie_actors
   has_many :movie_filming_locations, dependent: :destroy
@@ -26,14 +28,14 @@ class Movie < ApplicationRecord
 
     where(id: totals.keys).lock_for_ratings_update!
     where(id: totals.keys).update_all(
-      ratings_sum: arel_table[:ratings_sum] + per_movie(totals) { |stars, _reviews| stars },
-      ratings_count: arel_table[:ratings_count] + per_movie(totals) { |_stars, reviews| reviews }
+      ratings_sum: arel_table[:ratings_sum] + per_movie(totals, &:stars),
+      ratings_count: arel_table[:ratings_count] + per_movie(totals, &:count)
     )
   end
 
   def self.per_movie(totals)
-    totals.each_with_object(Arel::Nodes::Case.new(arel_table[:id])) do |(id, values), expression|
-      expression.when(id).then(yield(*values))
+    totals.each_with_object(Arel::Nodes::Case.new(arel_table[:id])) do |(id, total), expression|
+      expression.when(id).then(yield(total))
     end
   end
   private_class_method :per_movie
