@@ -17,8 +17,8 @@ RSpec.describe "API v1 movies", type: :request do
 
   before do
     Movie.add_ratings(
-      inception.id => Movie::RatingTotals.new(stars: 9, count: 2),
-      gone.id => Movie::RatingTotals.new(stars: 7, count: 2)
+      inception.id => Movie::RatingTotal.new(stars: 9, count: 2),
+      gone.id => Movie::RatingTotal.new(stars: 7, count: 2)
     )
     zodiac
   end
