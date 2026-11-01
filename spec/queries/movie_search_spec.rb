@@ -6,7 +6,10 @@ RSpec.describe MovieSearch do
   let!(:unrated) { create(:movie, title: "Arrival", year: 2016) }
 
   before do
-    Movie.add_ratings(inception.id => [ 11, 4 ], gone_in_60_seconds.id => [ 18, 5 ])
+    Movie.add_ratings(
+      inception.id => Movie::RatingTotals.new(stars: 11, count: 4),
+      gone_in_60_seconds.id => Movie::RatingTotals.new(stars: 18, count: 5)
+    )
   end
 
   describe "#sort" do
