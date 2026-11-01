@@ -1,7 +1,7 @@
 class Import::Dispatcher
   class FileNotFoundError < StandardError; end
 
-  IMPORTERS = {
+  IMPORTERS_IN_ORDER = {
     "movies" => Import::MoviesImporter,
     "reviews" => Import::ReviewsImporter
   }.freeze
@@ -25,24 +25,18 @@ class Import::Dispatcher
   end
 
   def call
-    files_in_import_order.map { |path, kind| import(path, kind) }
+    check!.map { |path, kind| import(path, kind) }
   end
 
   def check!
-    files_in_import_order
-    true
+    files_by_kind = paths.map { |path| [ path, detect_kind(path) ] }.group_by(&:last)
+
+    IMPORTERS_IN_ORDER.keys.flat_map { |kind| files_by_kind.fetch(kind, []) }
   end
 
   private
 
   attr_reader :paths
-
-  def files_in_import_order
-    paths.map { |path| [ path, detect_kind(path) ] }
-         .each_with_index
-         .sort_by { |(_path, kind), position| [ IMPORTERS.keys.index(kind), position ] }
-         .map(&:first)
-  end
 
   def detect_kind(path)
     raise FileNotFoundError, I18n.t("imports.errors.file_not_found", path:) unless File.file?(path)
@@ -51,7 +45,7 @@ class Import::Dispatcher
   end
 
   def import(path, kind)
-    Result.new(path:, kind:, import: IMPORTERS.fetch(kind).call(path))
+    Result.new(path:, kind:, import: IMPORTERS_IN_ORDER.fetch(kind).call(path))
   rescue Import::CsvImporter::AlreadyImportedError
     Result.new(path:, kind:, import: nil)
   end
