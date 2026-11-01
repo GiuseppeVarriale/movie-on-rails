@@ -94,6 +94,25 @@ RSpec.describe Movie, type: :model do
         .to raise_error(ActiveRecord::StatementInvalid, /movies_ratings_non_negative/)
     end
 
+    describe ".lock_for_ratings_update!" do
+      def sql_of(&)
+        statements = []
+        ActiveSupport::Notifications.subscribed(->(*, payload) { statements << payload[:sql] }, "sql.active_record", &)
+        statements.grep(/FOR NO KEY UPDATE/)
+      end
+
+      it "locks the movies in id order without blocking review inserts" do
+        expect(sql_of { described_class.where(id: [ 2, 1 ]).lock_for_ratings_update! }.sole)
+          .to include('WHERE "movies"."id" IN ($1, $2) ORDER BY "movies"."id" ASC FOR NO KEY UPDATE')
+      end
+
+      it "returns the locked ids" do
+        movies = create_list(:movie, 2)
+
+        expect(described_class.where(id: movies.map(&:id)).lock_for_ratings_update!).to eq(movies.map(&:id).sort)
+      end
+    end
+
     describe ".add_ratings" do
       let!(:other) { create(:movie) }
 
