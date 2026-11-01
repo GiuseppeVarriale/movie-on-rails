@@ -17,10 +17,14 @@ class Movie < ApplicationRecord
     less_than_or_equal_to: ->(_movie) { Date.current.year }
   }
 
+  def self.lock_for_ratings_update!
+    order(:id).lock("FOR NO KEY UPDATE").ids
+  end
+
   def self.add_ratings(totals)
     return if totals.empty?
 
-    where(id: totals.keys).order(:id).lock("FOR NO KEY UPDATE").ids
+    where(id: totals.keys).lock_for_ratings_update!
     where(id: totals.keys).update_all(
       ratings_sum: arel_table[:ratings_sum] + per_movie(totals) { |stars, _reviews| stars },
       ratings_count: arel_table[:ratings_count] + per_movie(totals) { |_stars, reviews| reviews }
