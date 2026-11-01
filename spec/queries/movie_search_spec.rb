@@ -7,8 +7,8 @@ RSpec.describe MovieSearch do
 
   before do
     Movie.add_ratings(
-      inception.id => Movie::RatingTotals.new(stars: 11, count: 4),
-      gone_in_60_seconds.id => Movie::RatingTotals.new(stars: 18, count: 5)
+      inception.id => Movie::RatingTotal.new(stars: 11, count: 4),
+      gone_in_60_seconds.id => Movie::RatingTotal.new(stars: 18, count: 5)
     )
   end
 

@@ -116,7 +116,7 @@ RSpec.describe Movie, type: :model do
     describe ".add_ratings" do
       let!(:other) { create(:movie) }
       let(:totals) do
-        { movie.id => Movie::RatingTotals.new(stars: 7, count: 2), other.id => Movie::RatingTotals.new(stars: 5, count: 1) }
+        { movie.id => Movie::RatingTotal.new(stars: 7, count: 2), other.id => Movie::RatingTotal.new(stars: 5, count: 1) }
       end
 
       it "adds each movie's totals to its counters" do
