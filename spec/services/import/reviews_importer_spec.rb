@@ -6,13 +6,6 @@ RSpec.describe Import::ReviewsImporter do
   let!(:gone_in_60_seconds) { create(:movie, title: "Gone in 60 seconds") }
   let!(:inception) { create(:movie, title: "Inception") }
 
-  def count_queries(&)
-    queries = 0
-    counter = ->(*, payload) { queries += 1 unless payload[:name].in?(%w[SCHEMA TRANSACTION]) }
-    ActiveSupport::Notifications.subscribed(counter, "sql.active_record", &)
-    queries
-  end
-
   describe ".call with the sample file" do
     subject(:import) { described_class.call(file_fixture("reviews.csv")) }
 

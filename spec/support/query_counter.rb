@@ -7,4 +7,4 @@ module QueryCounter
   end
 end
 
-RSpec.configure { |config| config.include QueryCounter, type: :request }
+RSpec.configure { |config| config.include QueryCounter }
