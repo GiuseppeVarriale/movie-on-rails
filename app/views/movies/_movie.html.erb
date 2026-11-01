@@ -8,13 +8,7 @@
   </header>
 
   <div class="mt-4 flex items-center gap-3">
-    <%= render "shared/stars", average: movie.average_stars %>
-    <% if movie.average_stars %>
-      <span class="font-semibold"><%= number_with_precision(movie.average_stars, precision: 2) %></span>
-      <span class="text-sm text-ink-50"><%= t(".reviews_count", count: movie.ratings_count) %></span>
-    <% else %>
-      <span class="text-sm text-ink-50"><%= t(".no_reviews") %></span>
-    <% end %>
+    <%= render "movies/rating", movie: %>
   </div>
 
   <% actors, hidden_actors = card_actors(movie, first: local_assigns[:highlighted_actor]) %>

@@ -1,0 +1,8 @@
+<% large = local_assigns.fetch(:large, false) %>
+<%= render "shared/stars", average: movie.average_stars, size: large ? "text-2xl" : "text-lg" %>
+<% if movie.average_stars %>
+  <%= tag.span number_with_precision(movie.average_stars, precision: 2), class: class_names("font-semibold", "text-h5": large) %>
+  <%= tag.span t(".reviews_count", count: movie.ratings_count), class: class_names("text-ink-50", "text-sm": !large) %>
+<% else %>
+  <%= tag.span t(".no_reviews"), class: class_names("text-ink-50", "text-sm": !large) %>
+<% end %>

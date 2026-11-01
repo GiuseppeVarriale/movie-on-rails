@@ -71,10 +71,6 @@ en:
       no_reviews: "No reviews yet"
     movie:
       directed_by: "Directed by %{director}"
-      reviews_count:
-        one: "1 review"
-        other: "%{count} reviews"
-      no_reviews: "No reviews yet"
       cast: "Cast"
       filmed_in: "Filmed in"
       filter_by: "Show movies with %{actor}"
@@ -83,6 +79,11 @@ en:
       more:
         one: "+1 more"
         other: "+%{count} more"
+    rating:
+      reviews_count:
+        one: "1 review"
+        other: "%{count} reviews"
+      no_reviews: "No reviews yet"
     filters:
       label: "Filter by actor"
       placeholder: "Search an actor…"

@@ -9,13 +9,7 @@
     <p class="mt-2 text-ink-60"><%= t("movies.movie.directed_by", director: @movie.director) %></p>
 
     <div class="mt-5 flex flex-wrap items-center gap-3">
-      <%= render "shared/stars", average: @movie.average_stars, size: "text-2xl" %>
-      <% if @movie.average_stars %>
-        <span class="text-h5 font-semibold"><%= number_with_precision(@movie.average_stars, precision: 2) %></span>
-        <span class="text-ink-50"><%= t("movies.movie.reviews_count", count: @movie.ratings_count) %></span>
-      <% else %>
-        <span class="text-ink-50"><%= t("movies.movie.no_reviews") %></span>
-      <% end %>
+      <%= render "movies/rating", movie: @movie, large: true %>
     </div>
   </header>
 
