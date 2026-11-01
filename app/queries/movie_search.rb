@@ -1,6 +1,6 @@
 class MovieSearch
   SORTS = {
-    "rating" => [ Arel.sql("average_stars DESC NULLS LAST"), { id: :desc } ],
+    "rating" => [ Movie.arel_table[:average_stars].desc.nulls_last, { id: :desc } ],
     "title" => [ { title: :asc } ],
     "newest" => [ { year: :desc }, { title: :asc } ]
   }.freeze
