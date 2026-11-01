@@ -34,7 +34,8 @@ RSpec.describe Movie::RatingsRecalculator, :without_transaction do
   it "runs alongside review imports without deadlocks and keeps exact totals" do
     run_alongside_imports
 
-    real = Review.group(:movie_id).pluck(:movie_id, Arel.sql("SUM(stars)"), Arel.sql("COUNT(*)")).to_h { |id, sum, count| [ id, [ sum, count ] ] }
+    counts = Review.group(:movie_id).count
+    real = Review.group(:movie_id).sum(:stars).to_h { |id, sum| [ id, [ sum, counts[id] ] ] }
     expect(Movie.pluck(:id, :ratings_sum, :ratings_count).to_h { |id, sum, count| [ id, [ sum, count ] ] }).to eq(real)
   end
 end
